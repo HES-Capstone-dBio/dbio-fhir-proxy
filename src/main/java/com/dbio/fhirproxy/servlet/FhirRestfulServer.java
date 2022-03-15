@@ -8,11 +8,6 @@ import org.springframework.context.ApplicationContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 
-
-/**
- * Author: Stephen Sheldon
- **/
-
 @WebServlet("/*")
 public class FhirRestfulServer extends RestfulServer {
 
