@@ -4,8 +4,6 @@
 name: Java CI with Maven
 
 on:
-  push:
-    branches-ignore: [ trunk ]
   pull_request:
     branches: [ trunk ]
 
