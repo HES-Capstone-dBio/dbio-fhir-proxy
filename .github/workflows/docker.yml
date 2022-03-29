@@ -21,6 +21,6 @@ jobs:
     - name: Package JAR
       run: mvn clean install
     - name: Build Docker image
-      run: docker build . --tag ssheldharv/dbio-fhir-proxy:${{ steps.vars.outputs.sha_short }} --tag ssheldharv/dbio-fhir-proxy:latest
+      run: docker build . --tag ssheldharv/dbio-fhir-proxy:$GITHUB_SHA --tag ssheldharv/dbio-fhir-proxy:latest
     - name: Push Docker image
       run: docker push --all-tags ssheldharv/dbio-fhir-proxy
