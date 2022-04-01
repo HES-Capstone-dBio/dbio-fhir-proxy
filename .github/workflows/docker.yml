@@ -39,5 +39,5 @@ jobs:
         push: true
         #cache-from: type=registry,ref=ssheldharv/dbio-fhir-proxy:latest
         #cache-to: type=inline
-        tags: latest, ${{GITHUB_SHA}}
+        tags: latest
         #build-args: PROFILE=nectar,ARG2=test
