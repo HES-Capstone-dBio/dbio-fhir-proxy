@@ -44,5 +44,32 @@
             <version>2.6.4</version>
         </dependency>
     </dependencies>
+  
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>io.fabric8</groupId>
+          <artifactId>docker-maven-plugin</artifactId>
+          <version>0.39.1</version>
+          <configuration>
+            <images>
+              <image>
+                <name>ssheldharv/dbio-fhir-proxy:${project.version}</name>
+                <alias>app</alias>
+                <build> 
+                  <from>openjdk:17-alpine</from> 
+                  <assembly>
+                    <descriptor>docker-assembly.xml</descriptor> 
+                  </assembly>
+                  <cmd> 
+                    <shell>java -jar /maven/app.jar</shell>
+                  </cmd>
+                </build>
+              </image>
+            </images>
+          </configuration>
+        </plugin>
+      </plugins>
+    </build>
 
 </project>
