@@ -78,7 +78,7 @@
           </configuration>
           <executions>
             <execution>
-              <phase>package</phase>
+              <phase>spring-boot:repackage</phase>
               <goals>
                 <goal>single</goal>
               </goals>
