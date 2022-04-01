@@ -78,7 +78,6 @@
             <archive>
               <manifest>
                 <addClasspath>true</addClasspath>
-                <classpathPrefix>lib/</classpathPrefix>
                 <mainClass>com.dbio.fhirproxy.Application</mainClass>
               </manifest>
             </archive>
