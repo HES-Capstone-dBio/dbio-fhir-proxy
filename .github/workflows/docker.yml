@@ -21,7 +21,7 @@ jobs:
     - name: Package JAR
       run: |
         mvn clean package
-        mv target/dbio-fhir-proxy*-with-dependencies.jar target/dbio-fhir-proxy*SNAPSHOT.jar
+        mv target/dbio-fhir-proxy*-with-dependencies.jar target/dbio-fhir-proxy-1.0-SNAPSHOT.jar
         mvn spring-boot:repackage
     - name: Build Docker image
       run: docker build . --tag ssheldharv/dbio-fhir-proxy:$GITHUB_SHA --tag ssheldharv/dbio-fhir-proxy:latest
