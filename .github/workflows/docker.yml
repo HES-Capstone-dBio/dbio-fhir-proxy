@@ -19,8 +19,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Package JAR
-      run: mvn clean install && \
-        ls /home/runner/.m2/repository/org/dbio/dbio-fhir-proxy/*-SNAPSHOT/dbio-fhir-proxy-*-SNAPSHOT.jar | head -1 | xargs -i cp {} $HOME/app.jar
+      run: mvn clean package spring-boot:repackage
     - name: Build Docker image
       run: docker build . --tag ${{ secrets.DOCKERHUB_USER }}/dbio-fhir-proxy:$GITHUB_SHA --tag ${{ secrets.DOCKERHUB_USER }}/dbio-fhir-proxy:latest
     - name: Login to Docker Hub
