@@ -59,7 +59,7 @@
                 <build> 
                   <from>openjdk:17-alpine</from> 
                   <assembly>
-                    <descriptorRef>artifact-with-dependencies</descriptorRef>
+                    <descriptorRef>artifact</descriptorRef>
                   </assembly>
                   <cmd> 
                     <shell>java -jar /maven/app.jar</shell>
