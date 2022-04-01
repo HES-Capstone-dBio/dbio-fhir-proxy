@@ -2,7 +2,7 @@ name: Docker Image Build & Release
 
 on:
   push:
-    branches: [ trunk ]
+    branches: [ trunk, user-docker-mvn ]
 
 jobs:
 
