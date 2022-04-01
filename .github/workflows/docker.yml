@@ -37,7 +37,7 @@ jobs:
         file: ./Dockerfile
         pull: true
         push: true
-        cache-from: type=registry,ref=hustakin/dbio-fhir-proxy:latest
+        cache-from: type=registry,ref=ssheldharv/dbio-fhir-proxy:latest
         cache-to: type=inline
-        tags: ssheldharv/dbio-fhir-proxy:latest
+        tags: ssheldharv/dbio-fhir-proxy:latest, ssheldharv/dbio-fhir-proxy:$GITHUB_SHA
         build-args: PROFILE=nectar,ARG2=test
