@@ -72,9 +72,6 @@
               <mainClass>${start-class}</mainClass>
             </manifest>
             </archive>
-            <descriptorRefs>
-              <descriptorRef>jar-with-dependencies</descriptorRef>
-            </descriptorRefs>
           </configuration>
           <executions>
             <execution>

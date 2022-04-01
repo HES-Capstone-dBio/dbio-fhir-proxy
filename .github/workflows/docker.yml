@@ -19,7 +19,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Package JAR
-      run: mvn clean package spring-boot:repackage && ls -a target
+      run: mvn clean package spring-boot:repackage
     - name: Build Docker image
       run: docker build . --tag ssheldharv/dbio-fhir-proxy:$GITHUB_SHA --tag ssheldharv/dbio-fhir-proxy:latest
     - name: Login to Docker Hub
