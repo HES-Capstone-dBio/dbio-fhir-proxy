@@ -21,7 +21,7 @@ jobs:
     - name: Package JAR
       run: mvn clean package spring-boot:repackage
     - name: Build Docker image
-      run: docker build . --tag ssheldharv/dbio-fhir-proxy:$GITHUB_SHA --tag ssheldharv/dbio-fhir-proxy:latest
+      run: docker build . --tag ${{ secrets.DOCKERHUB_USER }}/dbio-fhir-proxy:$GITHUB_SHA --tag ${{ secrets.DOCKERHUB_USER }}/dbio-fhir-proxy:latest
     - name: Login to Docker Hub
       uses: docker/login-action@v1
       with:
