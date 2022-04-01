@@ -58,9 +58,6 @@
                 <alias>app</alias>
                 <build> 
                   <from>openjdk:17-alpine</from> 
-                  <assembly>
-                    <descriptor>docker-assembly.xml</descriptor> 
-                  </assembly>
                   <cmd> 
                     <shell>java -jar /maven/app.jar</shell>
                   </cmd>
