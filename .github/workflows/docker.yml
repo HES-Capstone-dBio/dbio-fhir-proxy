@@ -35,9 +35,9 @@ jobs:
       with:
         context: .
         file: ./Dockerfile
-        pull: true
+        #pull: true
         push: true
-        cache-from: type=registry,ref=ssheldharv/dbio-fhir-proxy:latest
-        cache-to: type=inline
-        tags: latest, $GITHUB_SHA
+        #cache-from: type=registry,ref=ssheldharv/dbio-fhir-proxy:latest
+        #cache-to: type=inline
+        tags: latest, ${{GITHUB_SHA}}
         #build-args: PROFILE=nectar,ARG2=test
