@@ -20,9 +20,9 @@ jobs:
         cache: maven
     - name: Package JAR
       run: mvn clean install && \
-        cp /home/runner/.m2/repository/org/dbio/dbio-fhir-proxy/*-SNAPSHOT/dbio-fhir-proxy-*-SNAPSHOT.jar | head -1 | xargs -i cp {} $HOME/app.jar
+        ls /home/runner/.m2/repository/org/dbio/dbio-fhir-proxy/*-SNAPSHOT/dbio-fhir-proxy-*-SNAPSHOT.jar | head -1 | xargs -i cp {} $HOME/app.jar
     - name: Build Docker image
-      run: docker build . \
+      run: docker build .
             --tag ${{ secrets.DOCKERHUB_USER }}/dbio-fhir-proxy:$GITHUB_SHA \
             --tag ${{ secrets.DOCKERHUB_USER }}/dbio-fhir-proxy:latest
     - name: Login to Docker Hub
