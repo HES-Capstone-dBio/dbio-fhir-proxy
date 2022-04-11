@@ -1,3 +1,6 @@
+# security config
+src/main/resources/security/security.properties
+
 ### Java template
 # Compiled class file
 *.class
