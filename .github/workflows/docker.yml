@@ -18,11 +18,11 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: Package FHIR Proxy JAR
-      run: mvn clean package spring-boot:repackage
     - name: Package protocol-client JAR
       working-directory: ./protocol-client
-      run: sbt assembly
+      run: sbt publishLocal publishM2
+    - name: Package FHIR Proxy JAR
+      run: mvn clean package spring-boot:repackage
     - name: Build Docker image
       run: |
         docker build . \
