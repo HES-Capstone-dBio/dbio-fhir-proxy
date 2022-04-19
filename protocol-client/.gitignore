@@ -117,12 +117,12 @@ fabric.properties
 .git/
 
 # Secrets
-**/.secrets/
-**/.env
+.secrets/
+.env
 
 # Metals/SBT stuff
-**/.bloop/
-**/.bsp/
-**/.metals/
-**/project/metals.sbt
-**/project/project/
+.bloop/
+.bsp/
+.metals/
+project/metals.sbt
+project/project/

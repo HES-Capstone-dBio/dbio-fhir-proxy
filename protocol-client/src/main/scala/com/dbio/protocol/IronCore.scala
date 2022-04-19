@@ -9,6 +9,7 @@ import scala.concurrent.duration._
 
 object IronCore {
 
+  private val _ = System.loadLibrary("ironoxide_java")
   private val config = IronOxideConfig(PolicyCachingConfig(666), None)
   private val deviceOpts = DeviceCreateOpts(DeviceName("fhir-proxy"))
   private val timeout = Some(3.seconds)

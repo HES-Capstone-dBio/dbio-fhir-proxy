@@ -9,7 +9,9 @@ import scala.io.Source
 import java.time.Instant
 
 object JwtSigner {
+
   private val _ = System.loadLibrary("ironoxide_java")
+
   private val PRIVATE_KEY: String =
     Source
       .fromFile(System.getenv("JWT_SIGNING_KEY"))
@@ -19,9 +21,9 @@ object JwtSigner {
     */
   def ironcoreClaims(user: String, expires: Long): JwtClaim = JwtClaim(
     content = s"""{
-        "pid": 3335,
-        "sid": "dbio-signing-test",
-        "kid": 4161,
+        "pid": 3323,
+        "sid": "ZGJpby10ZXN0aW5n",
+        "kid": 4162,
         "sub": "$user",
         "exp": $expires
       }""",
