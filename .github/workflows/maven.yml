@@ -20,5 +20,7 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: Build with Maven
+    - name: Build FHIR Proxy with Maven
       run: mvn clean install
+    - name: Build protocol-client with SBT
+      run: sbt test
