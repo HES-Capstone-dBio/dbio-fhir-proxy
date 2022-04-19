@@ -14,7 +14,7 @@ object JwtSigner {
 
   private val PRIVATE_KEY: String =
     Source
-      .fromFile(System.getenv("JWT_SIGNING_KEY"))
+      .fromFile(sys.env("JWT_SIGNING_KEY"))
       .mkString
 
   /** Constructs default JWT claims for this project. TODO: Use dBio's official pid/sid/kid.
