@@ -116,3 +116,13 @@ fabric.properties
 # Git stuff
 .git/
 
+# Secrets
+**/.secrets/
+**/.env
+
+# Metals/SBT stuff
+**/.bloop/
+**/.bsp/
+**/.metals/
+**/project/metals.sbt
+**/project/project/
