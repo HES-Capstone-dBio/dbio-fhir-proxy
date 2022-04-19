@@ -118,6 +118,7 @@ fabric.properties
 
 # Secrets
 .secrets/
+.env
 
 # Metals/SBT stuff
 .bloop/
