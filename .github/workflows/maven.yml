@@ -24,7 +24,4 @@ jobs:
       run: mvn clean install
     - name: Build protocol-client with SBT
       working-directory: ./protocol-client
-      run: |
-        mkdir -p $HOME/.ivy2/local/
-        cp -r ../protocol-client/bin/com.ironcorelabs $HOME/.ivy2/local/
-        sbt test
+      run: sbt test
