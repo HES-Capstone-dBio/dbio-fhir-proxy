@@ -23,4 +23,5 @@ jobs:
     - name: Build FHIR Proxy with Maven
       run: mvn clean install
     - name: Build protocol-client with SBT
+      working-directory: ./protocol-client
       run: sbt test
