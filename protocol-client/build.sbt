@@ -10,6 +10,7 @@ Compile / console / scalacOptions --= Seq("-Xfatal-warnings", "-Ywarn-unused")
 lazy val root = (project in file(".")).settings(
   name := "protocol-client",
   scalacOptions ++= Seq("-Ywarn-unused", "-Ypartial-unification", "-Xfatal-warnings"),
+  resolvers += Resolver.sonatypeRepo("releases"),
   libraryDependencies ++= Seq(
     "org.typelevel" %% "cats-effect" % "3.3.11",
     "org.typelevel" %% "cats-effect-kernel" % "3.3.11",
