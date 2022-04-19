@@ -17,8 +17,7 @@ object JwtSigner {
       .fromFile(sys.env("JWT_SIGNING_KEY"))
       .mkString
 
-  /** Constructs default JWT claims for this project. TODO: Use dBio's official pid/sid/kid.
-    */
+  /** Constructs default JWT claims for this project. */
   def ironcoreClaims(user: String, expires: Long): JwtClaim = JwtClaim(
     content = s"""{
         "pid": 3323,
