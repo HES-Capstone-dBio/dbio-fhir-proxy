@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.ironcorelabs</groupId>
+    <artifactId>ironoxide-scala_2.12</artifactId>
+    <packaging>jar</packaging>
+    <description>ironoxide-scala</description>
+    <url>http://github.com/ironcorelabs/ironoxide-scala</url>
+    <version>0.14.1-SNAPSHOT</version>
+    <licenses>
+        <license>
+            <name>AGPL-3.0</name>
+            <url>https://www.gnu.org/licenses/agpl-3.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <name>ironoxide-scala</name>
+    <organization>
+        <name>com.ironcorelabs</name>
+        <url>http://github.com/ironcorelabs/ironoxide-scala</url>
+    </organization>
+    <scm>
+        <url>git@github.com:IronCoreLabs/ironoxide-scala.git</url>
+        <connection>scm:git@github.com:IronCoreLabs/ironoxide-scala.git</connection>
+    </scm>
+    <developers>
+        <developer>
+            <id>coltfred</id>
+            <name>Colt Frederickson</name>
+            <url>http://github.com/coltfred</url>
+        </developer>
+        <developer>
+            <id>clintfred</id>
+            <name>Clint Frederickson</name>
+            <url>http://github.com/clintfred</url>
+        </developer>
+        <developer>
+            <id>skeet70</id>
+            <name>Murph Murphy</name>
+            <url>http://github.com/skeet70</url>
+        </developer>
+        <developer>
+            <id>ernieturner</id>
+            <name>Ernie Turner</name>
+            <url>http://github.com/ernieturner</url>
+        </developer>
+        <developer>
+            <id>bobwall23</id>
+            <name>Bob Wall</name>
+            <url>http://github.com/bobwall23</url>
+        </developer>
+    </developers>
+    <dependencies>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>2.12.15</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scodec</groupId>
+            <artifactId>scodec-bits_2.12</artifactId>
+            <version>1.1.14</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ironcorelabs</groupId>
+            <artifactId>ironoxide-java</artifactId>
+            <version>0.14.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.typelevel</groupId>
+            <artifactId>cats-effect_2.12</artifactId>
+            <version>3.3.11</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ironcorelabs</groupId>
+            <artifactId>cats-scalatest_2.12</artifactId>
+            <version>3.0.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_2.12</artifactId>
+            <version>3.1.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
