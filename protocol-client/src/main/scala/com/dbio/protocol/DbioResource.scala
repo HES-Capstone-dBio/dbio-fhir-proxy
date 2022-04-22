@@ -88,20 +88,15 @@ final case class DbioResource(
 )
 
 object DbioResource {
-
   implicit val resourceDecoder: EntityDecoder[IO, DbioResource] = jsonOf[IO, DbioResource]
-
   private val Base: Uri = uri"https://dbio-protocol:8080/dbio"
-
   private val ResourcesClaimed: Uri = Base / "resources" / "claimed"
-
   private val ResourcesUnclaimed: Uri = Base / "resources" / "unclaimed"
-
   private val UserByEmail: Uri = Base / "users" / "email"
 
-  private def getUser(email: String): ReaderT[IO, Client[IO], DbioUser] =
+  private def getUser(email: String): ReaderT[IO, Client[IO], User] =
     ReaderT { client =>
-      client.expect[DbioUser](UserByEmail / email)
+      client.expect[User](UserByEmail / email)
     }
 
   /** Reads a ciphertext resource from the backend and decrypts it.
@@ -116,8 +111,8 @@ object DbioResource {
           IronCore.decrypt(resource.ciphertext).run)
     } yield GetResponse(resource, plaintext)
 
-  /** Posts given plaintext to dBio backend as an "escrowed" / unclaimed resource. Encrypts
-    * plaintext to a transfer group between this third party and intended user.
+  /** Posts given plaintext to dBio backend as an encrypted and unclaimed resource. Encrypts
+    * plaintext to a transfer group between this third party (creator) and intended user (subject).
     */
   def post(req: PostRequest): ReaderT[IO, Client[IO], PostResponse] =
     ReaderT { client =>
@@ -127,7 +122,7 @@ object DbioResource {
           json,
           from = UserId(req.creatorEmail),
           to = UserId(req.subjectEmail))
-      } yield ResourcePostPayload(
+      } yield PostPayload(
         email = req.subjectEmail,
         creatorEthAddress = req.creatorEthAddress,
         fhirResourceType = req.fhirResourceType,
