@@ -1,0 +1,145 @@
+package com.dbio.protocol
+
+import cats.data.ReaderT
+import cats.effect.IO
+import cats.implicits._
+import io.circe.Json
+import io.circe.generic.auto._
+import io.circe.parser.parse
+import ironoxide.v1.common.UserId
+import org.http4s._
+import org.http4s.circe.{jsonEncoderOf, jsonOf}
+import org.http4s.client.Client
+import org.http4s.dsl.io._
+import org.http4s.implicits._
+
+import java.time.ZonedDateTime
+
+final case class DbioUser(
+  ethPublicAddress: String,
+  email: String
+)
+
+object DbioUser {
+  implicit val userDecoder: EntityDecoder[IO, DbioUser] =
+    jsonOf[IO, DbioUser]
+}
+
+final case class DbioPostPayload(
+  email: String,
+  creatorEthAddress: String,
+  fhirResourceType: String,
+  fhirResourceId: String,
+  ironcoreDocumentId: String,
+  ciphertext: String
+)
+
+object DbioPostPayload {
+  implicit val postEncoder: EntityEncoder[IO, DbioPostPayload] =
+    jsonEncoderOf[IO, DbioPostPayload]
+}
+
+final case class DbioPostRequest(
+  subjectEmail: String,
+  creatorEmail: String,
+  password: String,
+  creatorEthAddress: String,
+  fhirResourceType: String,
+  fhirResourceId: String,
+  plaintext: String
+)
+
+final case class DbioPostResponse(
+  fhirResourceId: String,
+  ironcoreDocumentId: String,
+  subjectEthAddress: String,
+  creatorEthAddress: String,
+  fhirResourceType: String,
+  ciphertext: String,
+  timestamp: ZonedDateTime
+)
+
+object DbioPostResponse {
+  implicit val decodeResponse: EntityDecoder[IO, DbioPostResponse] =
+    jsonOf[IO, DbioPostResponse]
+}
+
+final case class DbioResource(
+  cid: String,
+  ciphertext: String,
+  ironcoreDocumentId: String,
+  fhirResourceId: String,
+  fhirResourceType: String
+)
+
+final case class DbioGetRequest(
+  requesteeEmail: String,
+  requestorEmail: String,
+  password: String,
+  resourceType: String,
+  resourceId: String
+)
+
+final case class DbioGetPayload(
+  resource: DbioResource,
+  plaintext: Json
+)
+
+object DbioResource {
+
+  implicit val resourceDecoder: EntityDecoder[IO, DbioResource] = jsonOf[IO, DbioResource]
+
+  private val Base: Uri = uri"https://dbio-protocol:8080/dbio"
+
+  private val ResourcesClaimed: Uri = Base / "resources" / "claimed"
+
+  private val ResourcesUnclaimed: Uri = Base / "resources" / "unclaimed"
+
+  private val UserByEmail: Uri = Base / "users" / "email"
+
+  private def getUser(email: String): ReaderT[IO, Client[IO], DbioUser] =
+    ReaderT { client =>
+      client.expect[DbioUser](UserByEmail / email)
+    }
+
+  /** Reads a ciphertext resource from the backend and decrypts it.
+    */
+  def get(req: DbioGetRequest): ReaderT[IO, Client[IO], DbioGetPayload] =
+    for {
+      user <- getUser(req.requesteeEmail)
+      at = ResourcesClaimed / user.ethPublicAddress / req.resourceType / req.resourceId
+      resource <- ReaderT((client: Client[IO]) => client.expect[DbioResource](at))
+      plaintext <- ReaderT.liftF(
+        IronCore.forUser(req.requestorEmail, req.password) >>=
+          IronCore.decrypt(resource.ciphertext).run)
+    } yield DbioGetPayload(resource, plaintext)
+
+  /** Posts given plaintext to dBio backend as an "escrowed" / unclaimed resource. Encrypts
+    * plaintext to a transfer group between this third party and intended user.
+    */
+  def post(req: DbioPostRequest): ReaderT[IO, Client[IO], DbioPostResponse] =
+    ReaderT { client =>
+      val payload = for {
+        json <- ReaderT.liftF(IO.fromEither(parse(req.plaintext)))
+        result <- IronCore.transferEncrypt(
+          json,
+          from = UserId(req.creatorEmail),
+          to = UserId(req.subjectEmail))
+      } yield DbioPostPayload(
+        email = req.subjectEmail,
+        creatorEthAddress = req.creatorEthAddress,
+        fhirResourceType = req.fhirResourceType,
+        fhirResourceId = req.fhirResourceId,
+        ironcoreDocumentId = result.id.id,
+        ciphertext = result.encryptedData.toBin
+      )
+      for {
+        iron <- IronCore.forUser(req.creatorEmail, req.password)
+        body <- payload.run(iron)
+        req = Request[IO](method = POST, uri = ResourcesUnclaimed).withEntity(body)
+        out <- client.expect[DbioPostResponse](req)
+      } yield out
+
+    }
+
+}
