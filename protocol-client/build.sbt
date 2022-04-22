@@ -5,6 +5,7 @@ Global / semanticdbVersion := scalafixSemanticdb.revision
 ThisBuild / organization := "com.dbio"
 ThisBuild / scalaVersion := "2.12.15"
 ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
+ThisBuild / versionScheme := Some("semver-spec")
 
 Compile / console / scalacOptions --= Seq("-Xfatal-warnings", "-Ywarn-unused")
 
