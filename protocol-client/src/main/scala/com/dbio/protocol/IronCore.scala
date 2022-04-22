@@ -20,6 +20,9 @@ object IronCore {
 
   /** Authenticate to IronCore for the given user and password. If the user does not exist in the
     * system, creates them.
+    *
+    * @param user should be an email address
+    * @param pass the user's password
     */
   def forUser(user: String, pass: String): IO[IronOxide[IO]] =
     for {
@@ -114,7 +117,10 @@ object IronCore {
       }
     } yield doc
 
-  /** Decrypt ad parse ciphertext data to Json.
+  /** Decrypts and parses ciphertext data to Json.
+    *
+    * @param ciphertext
+    *   valid byte string of encrypted resource
     */
   def decrypt(ciphertext: String): ReaderT[IO, IronOxide[IO], Json] =
     ReaderT { iron =>
