@@ -21,8 +21,10 @@ object IronCore {
   /** Authenticate to IronCore for the given user and password. If the user does not exist in the
     * system, creates them.
     *
-    * @param user should be an email address
-    * @param pass the user's password
+    * @param user
+    *   should be an email address
+    * @param pass
+    *   the user's password
     */
   def forUser(user: String, pass: String): IO[IronOxide[IO]] =
     for {
