@@ -25,7 +25,7 @@ object User {
     jsonOf[IO, User]
 }
 
-final case class ResourcePostPayload(
+final case class PostPayload(
   email: String,
   creatorEthAddress: String,
   fhirResourceType: String,
@@ -34,12 +34,12 @@ final case class ResourcePostPayload(
   ciphertext: String
 )
 
-object ResourcePostPayload {
-  implicit val postEncoder: EntityEncoder[IO, ResourcePostPayload] =
-    jsonEncoderOf[IO, ResourcePostPayload]
+object PostPayload {
+  implicit val postEncoder: EntityEncoder[IO, PostPayload] =
+    jsonEncoderOf[IO, PostPayload]
 }
 
-final case class ResourcePostRequest(
+final case class PostRequest(
   subjectEmail: String,
   creatorEmail: String,
   password: String,
@@ -49,7 +49,7 @@ final case class ResourcePostRequest(
   plaintext: String
 )
 
-final case class ResourcePostResponse(
+final case class PostResponse(
   fhirResourceId: String,
   ironcoreDocumentId: String,
   subjectEthAddress: String,
@@ -59,12 +59,12 @@ final case class ResourcePostResponse(
   timestamp: ZonedDateTime
 )
 
-object ResourcePostResponse {
-  implicit val decodeResponse: EntityDecoder[IO, ResourcePostResponse] =
-    jsonOf[IO, ResourcePostResponse]
+object PostResponse {
+  implicit val decodeResponse: EntityDecoder[IO, PostResponse] =
+    jsonOf[IO, PostResponse]
 }
 
-final case class ResourceGetRequest(
+final case class GetRequest(
   requesteeEmail: String,
   requestorEmail: String,
   password: String,
@@ -72,7 +72,7 @@ final case class ResourceGetRequest(
   resourceId: String
 )
 
-final case class ResourceGetResponse(
+final case class GetResponse(
   resource: DbioResource,
   plaintext: Json
 )
@@ -106,7 +106,7 @@ object DbioResource {
 
   /** Reads a ciphertext resource from the backend and decrypts it.
     */
-  def get(req: ResourceGetRequest): ReaderT[IO, Client[IO], ResourceGetResponse] =
+  def get(req: GetRequest): ReaderT[IO, Client[IO], GetResponse] =
     for {
       user <- getUser(req.requesteeEmail)
       at = ResourcesClaimed / user.ethPublicAddress / req.resourceType / req.resourceId
@@ -114,12 +114,12 @@ object DbioResource {
       plaintext <- ReaderT.liftF(
         IronCore.forUser(req.requestorEmail, req.password) >>=
           IronCore.decrypt(resource.ciphertext).run)
-    } yield ResourceGetResponse(resource, plaintext)
+    } yield GetResponse(resource, plaintext)
 
   /** Posts given plaintext to dBio backend as an "escrowed" / unclaimed resource. Encrypts
     * plaintext to a transfer group between this third party and intended user.
     */
-  def post(req: ResourcePostRequest): ReaderT[IO, Client[IO], ResourcePostResponse] =
+  def post(req: PostRequest): ReaderT[IO, Client[IO], PostResponse] =
     ReaderT { client =>
       val payload = for {
         json <- ReaderT.liftF(IO.fromEither(parse(req.plaintext)))
@@ -139,7 +139,7 @@ object DbioResource {
         iron <- IronCore.forUser(req.creatorEmail, req.password)
         body <- payload.run(iron)
         req = Request[IO](method = POST, uri = ResourcesUnclaimed).withEntity(body)
-        out <- client.expect[ResourcePostResponse](req)
+        out <- client.expect[PostResponse](req)
       } yield out
 
     }
