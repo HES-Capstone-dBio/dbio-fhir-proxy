@@ -11,7 +11,7 @@ import javax.servlet.annotation.WebServlet;
 @WebServlet("/*")
 public class FhirRestfulServer extends RestfulServer {
 
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
     public FhirRestfulServer(ApplicationContext context) {
         this.applicationContext = context;
