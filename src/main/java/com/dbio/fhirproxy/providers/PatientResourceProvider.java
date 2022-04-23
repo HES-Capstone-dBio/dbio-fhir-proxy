@@ -1,14 +1,26 @@
 package com.dbio.fhirproxy.providers;
 
+import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.context.FhirContext;
+import com.dbio.protocol.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 
+import ca.uhn.fhir.parser.IParser;
+import cats.effect.unsafe.IORuntime;
+
 public class PatientResourceProvider implements IResourceProvider {
+
+    public static String TYPE_NAME = "Patient";
 
     /**
      * The getResourceType method comes from IResourceProvider, and must be overridden to indicate what type of resource this provider supplies.
@@ -24,22 +36,47 @@ public class PatientResourceProvider implements IResourceProvider {
      * Read operations take a single parameter annotated with the {@link IdParam} paramater, and should return a single resource instance.
      *
      * @param theId
-     *            The read operation takes one parameter, which must be of type IdType and must be annotated with the "@Read.IdParam" annotation.
-     * @return Returns a resource matching this identifier, or null if none exists.
-     */
+     *            The read operation takes one parameter, which must be of type IdType and must be annotated with the "@Read.IdParam" annotation. @return Returns a resource matching this identifier, or null if none exists. */
     @Read()
-    public Patient readPatient(@IdParam IdType theId) {
-        Patient retVal = new Patient();
+    public Patient readPatient(@IdParam IdType theId, String requesteeEmail, String requestorEmail, String password) {
 
-        // ...populate...
-        retVal.addIdentifier().setSystem("urn:mrns").setValue("12345");
-        retVal.addName().setFamily("Smith").addGiven("Sally").addGiven("Sal");
-        // ...etc...
+        IParser parser = FhirContext.forR4().newJsonParser();
 
-        // if you know the version ID of the resource, you should set it and HAPI will
-        // include it in a Content-Location header
-        retVal.setId(new IdType("Patient", "123", "2"));
+        DbioGetRequest req = new DbioGetRequest(
+            requesteeEmail,
+            requestorEmail,
+            password,
+            TYPE_NAME,
+            theId.toString());
 
-        return retVal;
+        DbioGetResponse response = DbioResource.get(req).unsafeRunSync(IORuntime.global());
+        Patient out = parser.parseResource(Patient.class, response.plaintext().noSpaces());
+        return out;
     }
+    @Create
+    public MethodOutcome createPatient(@ResourceParam Patient patient, String subjectEmail, String creatorEmail, String password, String creatorEthAddress) {
+        IParser parser = FhirContext.forR4().newJsonParser();
+        IdType id = IdType.of(patient);
+        String plaintext = parser.encodeResourceToString(patient);
+        DbioPostRequest request = new DbioPostRequest(
+                subjectEmail,
+                creatorEmail,
+                password,
+                creatorEthAddress,
+                TYPE_NAME,
+                id.getId(),
+                parser.encodeResourceToString(patient)
+        );
+        try {
+            DbioPostResponse response = DbioResource.post(request).unsafeRunSync(IORuntime.global());
+            return new MethodOutcome(id, new OperationOutcome());
+        } catch (Throwable t) {
+            String diagnostic = String.format("Patient POST failed with {}", t);
+            OperationOutcome.OperationOutcomeIssueComponent issue =
+                new OperationOutcome.OperationOutcomeIssueComponent().setDiagnostics(diagnostic);
+            OperationOutcome outcome = new OperationOutcome().addIssue(issue);
+            return new MethodOutcome(id, outcome);
+        }
+    }
+
 }
