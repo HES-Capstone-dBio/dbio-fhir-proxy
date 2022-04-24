@@ -32,6 +32,9 @@ jobs:
         docker build .
         --tag ${{ secrets.DOCKERHUB_USER }}/dbio-fhir-proxy:$GITHUB_SHA
         --tag ${{ secrets.DOCKERHUB_USER }}/dbio-fhir-proxy:latest
+        --build-arg THIRD_PARTY_ETH_ADDRESS=${{ secrets.THIRD_PARTY_ETH_ADDRESS }}
+        --build-arg THIRD_PARTY_PRIVATE_KEY=${{ secrets.THIRD_PARTY_PRIVATE_KEY }}
+        --build-arg THIRD_PARTY_EMAIL=${{ secrets.THIRD_PARTY_EMAIL }}
     - name: Login to Docker Hub
       uses: docker/login-action@v1
       with:
