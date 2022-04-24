@@ -20,8 +20,17 @@ jobs:
         java-version: '8'
         distribution: 'temurin'
         cache: maven
+    - name: Extract signing key
+      env:
+        PEM: ${{ secrets.FHIR_PROXY_SIGNING_PEM }}
+      run: echo "$PEM" > signing.pem
     - name: Build protocol-client with SBT
       working-directory: ./protocol-client
-      run: sbt ";clean;scalafmtCheckAll;scalafixAll --check;test;publishM2"
+      env:
+        - JWT_SIGNING_KEY: ./signing.pem
+        - THIRD_PARTY_ETH_ADDRESS: ${{ secrets.THIRD_PARTY_ETH_ADDRESS }}
+        - THIRD_PARTY_PRIVATE_KEY: ${{ secrets.THIRD_PARTY_PRIVATE_KEY }}
+        - THIRD_PARTY_EMAIL: ${{ secrets.THIRD_PARTY_EMAIL }}
+      run: sbt -Djava.library.path=./bin ";clean;scalafmtCheckAll;scalafixAll --check;test;publishM2"
     - name: Build FHIR Proxy with Maven
       run: mvn clean install

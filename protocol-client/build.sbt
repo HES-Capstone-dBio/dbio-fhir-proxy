@@ -25,6 +25,8 @@ lazy val root = (project in file(".")).settings(
     "org.http4s" %% "http4s-circe" % "0.23.11",
     "com.ironcorelabs" %% "ironoxide-scala" % "0.15.0",
     "com.github.jwt-scala" %% "jwt-circe" % "9.0.5",
+    "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0" % Test,
+    "org.scalatest" %% "scalatest" % "3.2.11" % Test,
     compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
   )
 )
