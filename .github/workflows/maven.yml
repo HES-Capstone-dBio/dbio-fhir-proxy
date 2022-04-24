@@ -27,10 +27,10 @@ jobs:
     - name: Build protocol-client with SBT
       working-directory: ./protocol-client
       env:
-        - JWT_SIGNING_KEY: ./signing.pem
-        - THIRD_PARTY_ETH_ADDRESS: ${{ secrets.THIRD_PARTY_ETH_ADDRESS }}
-        - THIRD_PARTY_PRIVATE_KEY: ${{ secrets.THIRD_PARTY_PRIVATE_KEY }}
-        - THIRD_PARTY_EMAIL: ${{ secrets.THIRD_PARTY_EMAIL }}
+        JWT_SIGNING_KEY: ./signing.pem
+        THIRD_PARTY_ETH_ADDRESS: ${{ secrets.THIRD_PARTY_ETH_ADDRESS }}
+        THIRD_PARTY_PRIVATE_KEY: ${{ secrets.THIRD_PARTY_PRIVATE_KEY }}
+        THIRD_PARTY_EMAIL: ${{ secrets.THIRD_PARTY_EMAIL }}
       run: sbt -Djava.library.path=./bin ";clean;scalafmtCheckAll;scalafixAll --check;test;publishM2"
     - name: Build FHIR Proxy with Maven
       run: mvn clean install
