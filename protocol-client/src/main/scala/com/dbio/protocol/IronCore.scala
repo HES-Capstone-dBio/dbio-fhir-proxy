@@ -7,7 +7,7 @@ import io.circe.parser.parse
 import ironoxide.v1.IronOxide
 import ironoxide.v1.common.{GroupId, UserId, _}
 import ironoxide.v1.document.{DocumentEncryptOpts, DocumentEncryptResult}
-import ironoxide.v1.group.{GroupCreateOpts, GroupName}
+import ironoxide.v1.group.GroupCreateOpts
 import ironoxide.v1.user.UserCreateOpts
 
 import scala.concurrent.duration._
@@ -46,8 +46,8 @@ object IronCore {
     */
   private def transferGroupOpts(from: UserId, to: UserId): GroupCreateOpts =
     GroupCreateOpts(
-      id = Some(GroupId(s"$from->$to")),
-      name = Some(GroupName(s"$from->$to")),
+      id = None,
+      name = None,
       addAsAdmin = false,
       addAsMember = true,
       owner = Some(to),

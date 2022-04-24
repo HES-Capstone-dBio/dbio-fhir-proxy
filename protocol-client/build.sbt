@@ -12,7 +12,9 @@ Compile / console / scalacOptions --= Seq("-Xfatal-warnings", "-Ywarn-unused")
 lazy val root = (project in file(".")).settings(
   name := "protocol-client",
   scalacOptions ++= Seq("-Ywarn-unused", "-Ypartial-unification"),
+  resolvers += Resolver.sonatypeRepo("releases"),
   addCompilerPlugin(scalafixSemanticdb),
+  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-generic" % "0.14.1",
     "org.typelevel" %% "cats-effect" % "3.3.11",
