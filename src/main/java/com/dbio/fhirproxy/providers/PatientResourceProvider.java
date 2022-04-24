@@ -14,14 +14,30 @@ import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
-public class PatientResourceProvider implements IResourceProvider {
-    private Logger log = LoggerFactory.getLogger(this.getClass());
-    private static IParser parser = FhirContext.forR4().newJsonParser();
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
+public class PatientResourceProvider implements IResourceProvider {
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final IParser parser = FhirContext.forR4().newJsonParser();
     public static String TYPE_NAME = "Patient";
+    // TODO: Put these fields in ENV
     public static String CREATOR_EMAIL = "naa131@g.harvard.edu";
     public static String PASSWORD = "f39d271eff903230d73511104bb0bb4233af0cc77ad18731488e968e885b6f22";
     public static String CREATOR_ETH_ADDRESS = "0xb0c958dB100EFC9DbB725B54e93339d73158Df8a";
+
+    /** Hash the Patient resource using the MD5 algorithm and truncate to 64 chars. */
+    private static String hashId(Patient patient) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] bytes = parser.encodeResourceToString(patient).getBytes(StandardCharsets.UTF_8);
+            return new BigInteger(1, bytes).toString(36).subSequence(0, 64).toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * The getResourceType method comes from IResourceProvider, and must be overridden to indicate what type of resource this provider supplies.
@@ -32,25 +48,22 @@ public class PatientResourceProvider implements IResourceProvider {
     }
 
     @Search()
-    public Patient searchPatient(@RequiredParam(name="id") IdType theId, @RequiredParam(name="subjectEmail") String subjectEmail) {
-
+    public Patient searchPatient(@RequiredParam(name="id") String id, @RequiredParam(name="subjectEmail") String subjectEmail) {
         DbioGetRequest req = new DbioGetRequest(
                 subjectEmail,
                 CREATOR_EMAIL,
                 PASSWORD,
                 TYPE_NAME,
-                theId.toString());
-
+                id);
+        log.info(String.format("[DbioResource] Patient GET: %s", req));
         DbioGetResponse response = DbioResource.get(req).unsafeRunSync(IORuntime.global());
-        Patient out = parser.parseResource(Patient.class, response.plaintext().noSpaces());
-        return out;
+        Patient out = parser.parseResource(Patient.class, response.plaintext().noSpaces());;
+        return (Patient) out.setId(new IdType(id));
     }
 
     @Create
     public MethodOutcome createPatient(@ResourceParam Patient patient, @RequiredParam(name="subjectEmail") String subjectEmail) {
-        log.info(String.format("Patient input: %s", patient));
-        String id = "0x0x0666";
-        log.info(String.format("Creating ID: %s", id));
+        String id = hashId(patient);
         DbioPostRequest request = new DbioPostRequest(
                 subjectEmail,
                 CREATOR_EMAIL,
@@ -62,16 +75,15 @@ public class PatientResourceProvider implements IResourceProvider {
         );
         try {
             DbioPostResponse response = DbioResource.post(request).unsafeRunSync(IORuntime.global());
-            log.info(String.format("Succeeded POST with %s", response));
+            log.info(String.format("[DbioResource] Patient POST succeeded for id: %s", id));
             return new MethodOutcome(new IdType(id), new OperationOutcome());
         } catch (Throwable t) {
-            String diagnostic = String.format("Patient POST failed with %s", t);
+            String diagnostic = String.format("[DbioResource] Patient POST failed with: %s", t);
+            log.error(diagnostic);
             OperationOutcome.OperationOutcomeIssueComponent issue =
                     new OperationOutcome.OperationOutcomeIssueComponent().setDiagnostics(diagnostic);
             OperationOutcome outcome = new OperationOutcome().addIssue(issue);
-            log.error(String.format("Failed to POST Patient resource: %s", outcome));
-            log.error("Diagnostic: " + diagnostic);
-            return new MethodOutcome(new IdType(id), outcome);
+            return new MethodOutcome(new IdType(id), outcome); // TODO: Add id to response somehow
         }
     }
 

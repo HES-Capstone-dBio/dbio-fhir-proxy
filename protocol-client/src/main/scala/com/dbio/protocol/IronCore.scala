@@ -2,6 +2,7 @@ package com.dbio.protocol
 
 import cats.data.ReaderT
 import cats.effect.IO
+import cats.implicits._
 import io.circe.Json
 import io.circe.parser.parse
 import ironoxide.v1.IronOxide
@@ -9,6 +10,7 @@ import ironoxide.v1.common.{GroupId, UserId, _}
 import ironoxide.v1.document.{DocumentEncryptOpts, DocumentEncryptResult}
 import ironoxide.v1.group.GroupCreateOpts
 import ironoxide.v1.user.UserCreateOpts
+import scodec.bits.ByteVector
 
 import scala.concurrent.duration._
 
@@ -127,7 +129,9 @@ object IronCore {
   def decrypt(ciphertext: String): ReaderT[IO, IronOxide[IO], Json] =
     ReaderT { iron =>
       for {
-        doc <- iron.documentDecrypt(ciphertext.getBytes())
+        bytes <- IO.fromEither(
+          ByteVector.fromBase64Descriptive(ciphertext).leftMap(new IllegalArgumentException(_)))
+        doc <- iron.documentDecrypt(bytes)
         utf <- IO.fromEither(doc.decryptedData.decodeUtf8)
         json <- IO.fromEither(parse(utf))
       } yield json
