@@ -24,6 +24,7 @@ import scala.runtime.BoxedUnit;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 public class PatientResourceProvider implements IResourceProvider {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
@@ -47,7 +48,7 @@ public class PatientResourceProvider implements IResourceProvider {
      */
     private static String hashId(Patient patient) {
         byte[] bytes = parser.encodeResourceToString(patient).getBytes(StandardCharsets.UTF_8);
-        return new BigInteger(1, bytes).toString(36).subSequence(0, 64).toString();
+        return UUID.nameUUIDFromBytes(bytes).toString();
     }
 
     /**
@@ -68,7 +69,7 @@ public class PatientResourceProvider implements IResourceProvider {
         log.info(String.format("[DbioResource] Patient GET: %s", req));
         DbioGetResponse response = (DbioGetResponse) DbioResource.get(req).apply(injectClients).unsafeRunSync(IORuntime.global());
         Patient out = parser.parseResource(Patient.class, response.plaintext().noSpaces());
-        ;
+        
         return (Patient) out.setId(new IdType(id));
     }
 
