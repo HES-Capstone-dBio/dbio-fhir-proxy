@@ -145,7 +145,7 @@ object DbioResource {
   implicit val resourceEntityDecoder: EntityDecoder[IO, DbioResource] = jsonOf[IO, DbioResource]
 
   private val clientR: Resource[IO, Client[IO]] = BlazeClientBuilder[IO].resource
-  private val Base: Uri = uri"http://dbio-protocol_dbio-protocol_1:8080/dbio"
+  private val Base: Uri = uri"http://localhost:8080/dbio"
   private val ResourcesClaimed: Uri = Base / "resources" / "claimed"
   private val ResourcesUnclaimed: Uri = Base / "resources" / "unclaimed"
   private val UserByEmail: Uri = Base / "users" / "email"
