@@ -18,7 +18,7 @@ object IronCore {
   private val _ = System.loadLibrary("ironoxide_java")
   private val config = IronOxideConfig(PolicyCachingConfig(666), None)
   private val deviceOpts = DeviceCreateOpts(DeviceName("fhir-proxy"))
-  private val timeout = Some(3.seconds)
+  private val timeout = Some(10.seconds)
 
   /** Authenticate to IronCore for the given user and password. If the user does not exist in the
     * system, creates them.
