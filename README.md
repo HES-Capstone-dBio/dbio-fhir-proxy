@@ -4,7 +4,7 @@ This project is the FHIR Proxy Server service of the dBio system.
 
 ## Running Locally
 
-There are two primary ways to run this. Either from the command line with maven or within a IDE such as Intellij. This project uses Java 17. If you do not have Java 17 installed you can [download it here](https://www.oracle.com/java/technologies/downloads/)
+There are two primary ways to run this. Either from the command line with maven or within a IDE such as Intellij. This project uses Java 8. If you do not have Java 8 installed you can [download it here](https://www.oracle.com/java/technologies/downloads/)
 
 ### Using Spring Boot with :run
 
