@@ -2,7 +2,9 @@ name: Docker Image Build & Release
 
 on:
   push:
-    branches: [ trunk, aarch64 ]
+    branches: [ trunk ]
+  pull_request:
+    branches: [ aarch64-image ]
 
 jobs:
 
