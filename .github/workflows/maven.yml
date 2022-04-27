@@ -14,14 +14,21 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up JDK 17
+    - name: Set up JDK
       uses: actions/setup-java@v2
       with:
-        java-version: '17'
+        java-version: '8'
         distribution: 'temurin'
         cache: maven
-    - name: Build FHIR Proxy with Maven
-      run: mvn clean install
+    - name: Extract signing key
+      working-directory: ./protocol-client
+      env:
+        PEM: ${{ secrets.FHIR_PROXY_SIGNING_PEM }}
+      run: echo "$PEM" > signing.pem
     - name: Build protocol-client with SBT
       working-directory: ./protocol-client
-      run: sbt test
+      env:
+        JWT_SIGNING_KEY: ./signing.pem
+      run: sbt -Djava.library.path=./bin ";clean;scalafmtCheckAll;scalafixAll --check;test;publishM2"
+    - name: Build FHIR Proxy with Maven
+      run: mvn clean install
