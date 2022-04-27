@@ -27,7 +27,7 @@ jobs:
       env:
         PEM: ${{ secrets.FHIR_PROXY_SIGNING_PEM }}
       run: echo "$PEM" > signing.pem
-    - name: Build Docker image
+    - name: Build x64 Docker image
       run: >
         docker build .
         --tag ${{ secrets.DOCKERHUB_USER }}/dbio-fhir-proxy:$GITHUB_SHA
@@ -35,6 +35,11 @@ jobs:
         --build-arg THIRD_PARTY_ETH_ADDRESS=${{ secrets.THIRD_PARTY_ETH_ADDRESS }}
         --build-arg THIRD_PARTY_PRIVATE_KEY=${{ secrets.THIRD_PARTY_PRIVATE_KEY }}
         --build-arg THIRD_PARTY_EMAIL=${{ secrets.THIRD_PARTY_EMAIL }}
+    - name: Build aarch64 Docker image
+      run: >
+        docker build aarch64
+        --tag ${{ secrets.DOCKERHUB_USER }}/dbio-fhir-proxy:$GITHUB_SHA-aarch64
+        --tag ${{ secrets.DOCKERHUB_USER }}/dbio-fhir-proxy:latest-aarch64
     - name: Login to Docker Hub
       uses: docker/login-action@v1
       with:
