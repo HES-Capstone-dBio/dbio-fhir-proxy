@@ -85,7 +85,8 @@ object DbioAccessControl {
 
   private def doGet(
     requesteeEth: String,
-    uri: Uri): ReaderT[IO, Client[IO], List[AccessRequestStatus]] =
+    uri: Uri
+  ): ReaderT[IO, Client[IO], List[AccessRequestStatus]] =
     ReaderT(client => client.expect[List[AccessRequestStatus]](uri / requesteeEth))
 
   /** Gets list of DbioReadRequests for the given user. TODO: Should be queried by requestor not

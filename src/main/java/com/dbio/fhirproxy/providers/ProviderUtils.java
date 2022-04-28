@@ -3,8 +3,11 @@ package com.dbio.fhirproxy.providers;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.OperationOutcome;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class ProviderUtils {
@@ -30,6 +33,20 @@ public class ProviderUtils {
      */
     public static <R extends DomainResource> R deserialize(Class<R> clazz, String json) {
         return parser.parseResource(clazz, json);
+    }
+
+    /**
+     * Yield an OperationOutcome which describes an error.
+     */
+    public static OperationOutcome fhirException(String diagnostic) {
+        return new OperationOutcome().addIssue(
+                new OperationOutcome.OperationOutcomeIssueComponent().setCode(OperationOutcome.IssueType.EXCEPTION).setDiagnostics(diagnostic));
+    }
+
+    public static <A> List<A> toJavaList(scala.collection.immutable.List<A> ls) {
+        List<A> out = new ArrayList<A>();
+        ls.foreach(out::add);
+        return out;
     }
 
 }
