@@ -10,7 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 public class DbioReadRequestProvider implements IResourceProvider {
     @Override
     public Class<? extends IBaseResource> getResourceType() {
-        return DbioReadRequest.class
+        return DbioReadRequest.class;
     }
 
     @Create
