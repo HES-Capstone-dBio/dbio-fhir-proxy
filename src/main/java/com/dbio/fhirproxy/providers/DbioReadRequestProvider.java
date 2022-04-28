@@ -21,8 +21,6 @@ import scala.Tuple2;
 import scala.runtime.BoxedUnit;
 
 public class DbioReadRequestProvider implements IResourceProvider {
-
-    private static final IParser parser = FhirContext.forR4().newJsonParser();
     private static Tuple2<Client<IO>, IO<BoxedUnit>> clientAllocate = DbioResource.allocateClient().unsafeRunSync(IORuntime.global());
 
     OperationOutcome exception = new OperationOutcome().addIssue(
@@ -47,6 +45,6 @@ public class DbioReadRequestProvider implements IResourceProvider {
         } catch (Throwable e) {
             return new MethodOutcome().setOperationOutcome(exception);
         }
-        return new MethodOutcome(new IdType(""), true);
+        return new MethodOutcome(new IdType(ProviderUtils.generateUUID(dbioReadRequest)), true);
     }
 }
