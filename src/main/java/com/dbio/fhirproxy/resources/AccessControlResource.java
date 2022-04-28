@@ -5,5 +5,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 
 public abstract class AccessControlResource implements IResource {
     public IdDt id;
+    public String requestorEthAddress;
+    public String requesteeEthAddress;
     public String requestorDetails;
 }
