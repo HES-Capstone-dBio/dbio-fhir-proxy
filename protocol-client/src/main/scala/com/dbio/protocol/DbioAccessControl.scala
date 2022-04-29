@@ -58,15 +58,16 @@ object AccessRequestStatus {
   implicit val entDecARS: EntityDecoder[IO, AccessRequestStatus] =
     jsonOf[IO, AccessRequestStatus]
 
-  implicit val decARSList: Decoder[List[AccessRequestStatus]] =
-    Decoder[List[AccessRequestStatus]]
+  //implicit val decARSList: Decoder[List[AccessRequestStatus]] =
+    //Decoder[List[AccessRequestStatus]]
+    //deriveDecoder[List[AccessRequestStatus]]
 
   implicit val entDecARSList: EntityDecoder[IO, List[AccessRequestStatus]] =
     jsonOf[IO, List[AccessRequestStatus]]
 }
 
 object DbioAccessControl {
-  val Base: Uri = uri"http://dbio-protocol:8080/"
+  val Base: Uri = uri"http://dbio-protocol:8080/dbio"
   val ReadRequests = Base / "read_requests"
   val WriteRequests = Base / "write_requests"
 
@@ -87,7 +88,9 @@ object DbioAccessControl {
     requesteeEth: String,
     uri: Uri
   ): ReaderT[IO, Client[IO], List[AccessRequestStatus]] =
-    ReaderT(client => client.expect[List[AccessRequestStatus]](uri / requesteeEth))
+    ReaderT(client =>
+      client.expect[List[AccessRequestStatus]](
+        (uri / requesteeEth).withQueryParam("filter", "open")))
 
   /** Gets list of DbioReadRequests for the given user. TODO: Should be queried by requestor not
     * requestee.

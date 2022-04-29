@@ -20,12 +20,11 @@ import org.slf4j.LoggerFactory;
 import scala.Tuple2;
 import scala.runtime.BoxedUnit;
 
+import static com.dbio.fhirproxy.providers.ProviderUtils.*;
+
 public class PatientResourceProvider implements IResourceProvider {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     public static String TYPE_NAME = "Patient";
-    private static String CREATOR_EMAIL = System.getenv("THIRD_PARTY_EMAIL");
-    private static String PASSWORD = System.getenv("THIRD_PARTY_PRIVATE_KEY");
-    private static String CREATOR_ETH_ADDRESS = System.getenv("THIRD_PARTY_ETH_ADDRESS");
     private static IronOxide<IO> ironCore = IronCore.forUser(CREATOR_EMAIL, PASSWORD).unsafeRunSync(IORuntime.global());
     private static Tuple2<Client<IO>, IO<BoxedUnit>> clientAllocate = DbioResource.allocateClient().unsafeRunSync(IORuntime.global());
     private static InjectClients injectClients = new InjectClients(ironCore, clientAllocate._1());
