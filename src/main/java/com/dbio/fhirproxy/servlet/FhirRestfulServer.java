@@ -1,7 +1,8 @@
 package com.dbio.fhirproxy.servlet;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.RestfulServer;
-
+import com.dbio.fhirproxy.providers.DbioAccessRequestProvider;
 import com.dbio.fhirproxy.providers.PatientResourceProvider;
 import org.springframework.context.ApplicationContext;
 
@@ -21,6 +22,6 @@ public class FhirRestfulServer extends RestfulServer {
     protected void initialize() throws ServletException {
         super.initialize();
         setFhirContext(FhirContext.forR4());
-        setResourceProviders(new PatientResourceProvider());
+        setResourceProviders(new PatientResourceProvider(), new DbioAccessRequestProvider());
     }
 }
