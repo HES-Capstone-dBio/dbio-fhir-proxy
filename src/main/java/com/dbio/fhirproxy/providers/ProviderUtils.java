@@ -12,9 +12,10 @@ import java.util.UUID;
 
 public class ProviderUtils {
     private static final IParser parser = FhirContext.forR4().newJsonParser();
-    public static String CREATOR_EMAIL = System.getenv("THIRD_PARTY_EMAIL");
+    public static String PROVIDER_EMAIL = System.getenv("THIRD_PARTY_EMAIL");
     public static String PASSWORD = System.getenv("THIRD_PARTY_PRIVATE_KEY");
-    public static String CREATOR_ETH_ADDRESS = System.getenv("THIRD_PARTY_ETH_ADDRESS");
+    public static String PROVIDER_ETH_ADDRESS = System.getenv("THIRD_PARTY_ETH_ADDRESS");
+    public static String PROVIDER_DETAILS = "Massachusetts General Hospital";
 
     /**
      * Hash the Patient resource using the MD5 algorithm and truncate to 64 chars.

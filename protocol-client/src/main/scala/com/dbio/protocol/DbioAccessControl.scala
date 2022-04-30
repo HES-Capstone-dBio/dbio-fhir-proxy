@@ -1,41 +1,35 @@
 package com.dbio.protocol
 
-import org.http4s.Uri
-import org.http4s.implicits._
-import org.http4s.circe.{jsonEncoderOf, jsonOf}
-import org.http4s.circe._
 import cats.data.ReaderT
 import cats.effect.IO
-import org.http4s.client.Client
-import io.circe.Decoder
-import org.http4s._
+import cats.implicits._
+import io.circe.{Decoder, Encoder}
 import org.http4s.Method.POST
-import io.circe.Encoder
+import org.http4s.circe.{jsonEncoderOf, jsonOf}
+import org.http4s.client.Client
+import org.http4s.implicits._
+import org.http4s.{Uri, _}
 
 final case class AccessRequest(
   requestorEthAddress: String,
-  requesteeEthAddress: String
-  // requestorDetails: String,
+  requesteeEthAddress: String,
+  requestorDetails: String
 )
 
 object AccessRequest {
   implicit val decAR: Decoder[AccessRequest] =
-    Decoder.forProduct2("requestor_eth_address", "requestee_eth_address")(AccessRequest.apply)
+    Decoder.forProduct3("requestor_eth_address", "requestee_eth_address", "requestor_details")(
+      AccessRequest.apply)
 
   implicit val encAR: Encoder[AccessRequest] =
-    Encoder.forProduct2("requestor_eth_address", "requestee_eth_address")(a =>
-      (a.requestorEthAddress, a.requesteeEthAddress))
+    Encoder.forProduct3("requestor_eth_address", "requestee_eth_address", "requestor_details")(a =>
+      (a.requestorEthAddress, a.requesteeEthAddress, a.requestorDetails))
 
   implicit val entDecAR: EntityDecoder[IO, AccessRequest] =
     jsonOf[IO, AccessRequest]
 
   implicit val entEncAR: EntityEncoder[IO, AccessRequest] =
     jsonEncoderOf[IO, AccessRequest]
-
-  // TODO: Switch to this once "details" field is accepted by backend
-  // implicit val encAR: Encoder[AccessRequest] =
-  // Encoder.forProduct3("requestor_eth_address", "requestee_eth_address", "requestor_details")(a =>
-  // (a.requestorEthAddress, a.requesteeEthAddress, a.requestorDetails))
 }
 
 final case class AccessRequestStatus(
@@ -57,10 +51,6 @@ object AccessRequestStatus {
 
   implicit val entDecARS: EntityDecoder[IO, AccessRequestStatus] =
     jsonOf[IO, AccessRequestStatus]
-
-  //implicit val decARSList: Decoder[List[AccessRequestStatus]] =
-    //Decoder[List[AccessRequestStatus]]
-    //deriveDecoder[List[AccessRequestStatus]]
 
   implicit val entDecARSList: EntityDecoder[IO, List[AccessRequestStatus]] =
     jsonOf[IO, List[AccessRequestStatus]]
@@ -84,7 +74,7 @@ object DbioAccessControl {
   def postWriteRequest(ar: AccessRequest, client: Client[IO]): IO[AccessRequest] =
     doPost(ar, WriteRequests).run(client)
 
-  private def doGet(
+  private def doGetList(
     requesteeEth: String,
     uri: Uri
   ): ReaderT[IO, Client[IO], List[AccessRequestStatus]] =
@@ -92,16 +82,43 @@ object DbioAccessControl {
       client.expect[List[AccessRequestStatus]](
         (uri / requesteeEth).withQueryParam("filter", "open")))
 
+  private def doGet(
+    id: Int,
+    uri: Uri
+  ): ReaderT[IO, Client[IO], AccessRequestStatus] =
+    ReaderT(client => client.expect[AccessRequestStatus](uri / "id" / id))
+
   /** Gets list of DbioReadRequests for the given user. TODO: Should be queried by requestor not
     * requestee.
     */
-  def getReadRequests(requesteeEth: String, client: Client[IO]): IO[List[AccessRequestStatus]] =
-    doGet(requesteeEth, ReadRequests).run(client)
+  def getReadRequests(requestee: String, client: Client[IO]): IO[List[AccessRequestStatus]] =
+    doGetList(requestee, ReadRequests).run(client)
 
   /** Gets list of DbioWriteRequests for the given user. TODO: Should be queried by requestor not
     * requestee.
     */
-  def getWriteRequests(requesteeEth: String, client: Client[IO]): IO[List[AccessRequestStatus]] =
-    doGet(requesteeEth, WriteRequests).run(client)
+  def getWriteRequests(requestee: String, client: Client[IO]): IO[List[AccessRequestStatus]] =
+    doGetList(requestee, WriteRequests).run(client)
 
+  /** Gets single DbioReadRequest for the given user and requestor pair. */
+  def getReadRequest(id: Int, requestor: String, client: Client[IO]): IO[AccessRequestStatus] =
+    doGet(id, ReadRequests)
+      .run(client)
+      .flatMap(a =>
+        if (a.requestorEthAddress === requestor) IO.pure(a)
+        else
+          IO.raiseError(
+            new IllegalAccessError(
+              s"[DbioAccessControl] AccessRequest not for requestor=$requestor")))
+
+  /** Gets single DbioWriteRequests for the given user and requestor pair. */
+  def getWriteRequest(id: Int, requestor: String, client: Client[IO]): IO[AccessRequestStatus] =
+    doGet(id, WriteRequests)
+      .run(client)
+      .flatMap(a =>
+        if (a.requestorEthAddress === requestor) IO.pure(a)
+        else
+          IO.raiseError(
+            new IllegalAccessError(
+              s"[DbioAccessControl] AccessRequest not for requestor=$requestor")))
 }

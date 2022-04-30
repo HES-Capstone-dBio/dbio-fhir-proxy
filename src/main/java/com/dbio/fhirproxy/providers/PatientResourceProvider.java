@@ -25,7 +25,7 @@ import static com.dbio.fhirproxy.providers.ProviderUtils.*;
 public class PatientResourceProvider implements IResourceProvider {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     public static String TYPE_NAME = "Patient";
-    private static IronOxide<IO> ironCore = IronCore.forUser(CREATOR_EMAIL, PASSWORD).unsafeRunSync(IORuntime.global());
+    private static IronOxide<IO> ironCore = IronCore.forUser(PROVIDER_EMAIL, PASSWORD).unsafeRunSync(IORuntime.global());
     private static Tuple2<Client<IO>, IO<BoxedUnit>> clientAllocate = DbioResource.allocateClient().unsafeRunSync(IORuntime.global());
     private static InjectClients injectClients = new InjectClients(ironCore, clientAllocate._1());
 
@@ -47,7 +47,7 @@ public class PatientResourceProvider implements IResourceProvider {
     public Patient searchPatient(@RequiredParam(name = "id") String id, @RequiredParam(name = "subjectEmail") String subjectEmail) {
         DbioGetRequest req = new DbioGetRequest(
                 subjectEmail,
-                CREATOR_EMAIL,
+                PROVIDER_EMAIL,
                 TYPE_NAME,
                 id);
         log.info(String.format("[DbioResource] Patient GET: %s", req));
@@ -61,8 +61,8 @@ public class PatientResourceProvider implements IResourceProvider {
         String id = ProviderUtils.generateUUID(patient);
         DbioPostRequest request = new DbioPostRequest(
                 subjectEmail,
-                CREATOR_EMAIL,
-                CREATOR_ETH_ADDRESS,
+                PROVIDER_EMAIL,
+                PROVIDER_ETH_ADDRESS,
                 TYPE_NAME,
                 id,
                 ProviderUtils.serialize(patient)
@@ -77,7 +77,7 @@ public class PatientResourceProvider implements IResourceProvider {
             OperationOutcome.OperationOutcomeIssueComponent issue =
                     new OperationOutcome.OperationOutcomeIssueComponent().setDiagnostics(diagnostic);
             OperationOutcome outcome = new OperationOutcome().addIssue(issue);
-            return new MethodOutcome(new IdType(id), outcome); // TODO: Add id to response somehow
+            return new MethodOutcome(new IdType(id), outcome);
         }
     }
 
