@@ -22,7 +22,6 @@ import scala.Tuple2;
 import scala.runtime.BoxedUnit;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,8 +38,8 @@ public class DbioAccessRequestProvider implements IResourceProvider {
         out.isApproved = new BooleanType(stat.requestApproved());
         out.isOpen = new BooleanType(stat.requestOpen());
         out.requesteeEthAddress = new StringType(stat.requesteeEthAddress());
-        out.createdDate = new DateTimeType(out.createdDate.toCalendar());
-        out.updatedDate = new DateTimeType(out.updatedDate.toCalendar());
+        out.createdDate = new DateTimeType(stat.createdTime().toString());
+        out.updatedDate = new DateTimeType(stat.lastUpdatedTime().toString());
         out.setId(String.format("%s", stat.id()));
         return out;
     }

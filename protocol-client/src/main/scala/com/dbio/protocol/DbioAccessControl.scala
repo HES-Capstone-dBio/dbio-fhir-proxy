@@ -37,23 +37,25 @@ object AccessRequest {
 final case class AccessRequestStatus(
   id: Int,
   requestorEthAddress: String,
+  requestorDetails: String,
   requesteeEthAddress: String,
   requestApproved: Boolean,
   requestOpen: Boolean,
-  createdDate: ZonedDateTime,
-  lastUpdatedDate: ZonedDateTime
+  createdTime: ZonedDateTime,
+  lastUpdatedTime: ZonedDateTime
 )
 
 object AccessRequestStatus {
   implicit val decARS: Decoder[AccessRequestStatus] =
-    Decoder.forProduct7(
+    Decoder.forProduct8(
       "id",
       "requestor_eth_address",
+      "requestor_details",
       "requestee_eth_address",
       "request_approved",
       "request_open",
-      "created_date",
-      "last_updated_date")(AccessRequestStatus.apply)
+      "created_time",
+      "last_updated_time")(AccessRequestStatus.apply)
 
   implicit val entDecARS: EntityDecoder[IO, AccessRequestStatus] =
     jsonOf[IO, AccessRequestStatus]
