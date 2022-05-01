@@ -70,7 +70,7 @@ public class PatientResourceProvider implements IResourceProvider {
         try {
             DbioPostResponse response = (DbioPostResponse) DbioResource.post(request).apply(injectClients).unsafeRunSync(IORuntime.global());
             log.info(String.format("[DbioResource] Patient POST succeeded for id: %s", id));
-            return new MethodOutcome(new IdType(id), new OperationOutcome()).setId(new IdType(id));
+            return new MethodOutcome(new IdType(id), new OperationOutcome()).setId(new IdType(id)).setResource(patient);
         } catch (Throwable t) {
             String diagnostic = String.format("[DbioResource] Patient POST failed with: %s", t);
             log.error(diagnostic);

@@ -70,7 +70,8 @@ public class DbioAccessRequestProvider implements IResourceProvider {
         } catch (Throwable e) {
             return new MethodOutcome().setOperationOutcome(ProviderUtils.fhirException(String.format("Create AccessRequest failed with %s", e)));
         }
-        return new MethodOutcome(new IdType(ProviderUtils.generateUUID(dbioAccessRequest)), true).setResource(dbioAccessRequest.setId(dbioAccessRequest.getId()));
+        return new MethodOutcome(new IdType(ProviderUtils.generateUUID(dbioAccessRequest)), true)
+                .setResource(dbioAccessRequest.setId(dbioAccessRequest.getId()));
     }
 
     @Search
