@@ -12,6 +12,7 @@ import com.dbio.protocol.DbioAccessControl;
 import com.dbio.protocol.DbioResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StringType;
 import org.http4s.client.Client;
@@ -21,6 +22,7 @@ import scala.Tuple2;
 import scala.runtime.BoxedUnit;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +39,8 @@ public class DbioAccessRequestProvider implements IResourceProvider {
         out.isApproved = new BooleanType(stat.requestApproved());
         out.isOpen = new BooleanType(stat.requestOpen());
         out.requesteeEthAddress = new StringType(stat.requesteeEthAddress());
+        out.createdDate = new DateTimeType(out.createdDate.toCalendar());
+        out.updatedDate = new DateTimeType(out.updatedDate.toCalendar());
         out.setId(String.format("%s", stat.id()));
         return out;
     }
@@ -67,16 +71,24 @@ public class DbioAccessRequestProvider implements IResourceProvider {
         } catch (Throwable e) {
             return new MethodOutcome().setOperationOutcome(ProviderUtils.fhirException(String.format("Create AccessRequest failed with %s", e)));
         }
-        return new MethodOutcome(new IdType(ProviderUtils.generateUUID(dbioAccessRequest)), true);
+        return new MethodOutcome(new IdType(ProviderUtils.generateUUID(dbioAccessRequest)), true).setResource(dbioAccessRequest.setId(dbioAccessRequest.getId()));
     }
 
     @Search
     public List<DbioAccessRequest> searchAccessRequests(@RequiredParam(name = "requestee_eth_address") String requesteeEthAddress, @RequiredParam(name = "access_request_type") String type) {
         switch (type) {
             case "WriteRequest":
-                return ProviderUtils.toJavaList(DbioAccessControl.getWriteRequests(requesteeEthAddress, clientAllocate._1()).unsafeRunSync(IORuntime.global())).stream().map(DbioAccessRequestProvider::fromAccessRequestStatus).collect(Collectors.toList());
+                return ProviderUtils.toJavaList(DbioAccessControl.getWriteRequests(requesteeEthAddress, clientAllocate._1())
+                        .unsafeRunSync(IORuntime.global()))
+                        .stream()
+                        .map(DbioAccessRequestProvider::fromAccessRequestStatus)
+                        .collect(Collectors.toList());
             case "ReadRequest":
-                return ProviderUtils.toJavaList(DbioAccessControl.getReadRequests(requesteeEthAddress, clientAllocate._1()).unsafeRunSync(IORuntime.global())).stream().map(DbioAccessRequestProvider::fromAccessRequestStatus).collect(Collectors.toList());
+                return ProviderUtils.toJavaList(DbioAccessControl.getReadRequests(requesteeEthAddress, clientAllocate._1())
+                        .unsafeRunSync(IORuntime.global()))
+                        .stream()
+                        .map(DbioAccessRequestProvider::fromAccessRequestStatus)
+                        .collect(Collectors.toList());
         }
         return new ArrayList<>();
     }

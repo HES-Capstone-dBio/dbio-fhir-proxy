@@ -10,6 +10,8 @@ import org.http4s.client.Client
 import org.http4s.implicits._
 import org.http4s.{Uri, _}
 
+import java.time.ZonedDateTime
+
 final case class AccessRequest(
   requestorEthAddress: String,
   requesteeEthAddress: String,
@@ -37,17 +39,21 @@ final case class AccessRequestStatus(
   requestorEthAddress: String,
   requesteeEthAddress: String,
   requestApproved: Boolean,
-  requestOpen: Boolean
+  requestOpen: Boolean,
+  createdDate: ZonedDateTime,
+  lastUpdatedDate: ZonedDateTime
 )
 
 object AccessRequestStatus {
   implicit val decARS: Decoder[AccessRequestStatus] =
-    Decoder.forProduct5(
+    Decoder.forProduct7(
       "id",
       "requestor_eth_address",
       "requestee_eth_address",
       "request_approved",
-      "request_open")(AccessRequestStatus.apply)
+      "request_open",
+      "created_date",
+      "last_updated_date")(AccessRequestStatus.apply)
 
   implicit val entDecARS: EntityDecoder[IO, AccessRequestStatus] =
     jsonOf[IO, AccessRequestStatus]
@@ -61,17 +67,17 @@ object DbioAccessControl {
   val ReadRequests = Base / "read_requests"
   val WriteRequests = Base / "write_requests"
 
-  private def doPost(ar: AccessRequest, to: Uri): ReaderT[IO, Client[IO], AccessRequest] = {
+  private def doPost(ar: AccessRequest, to: Uri): ReaderT[IO, Client[IO], AccessRequestStatus] = {
     val req = Request[IO](method = POST, uri = to).withEntity(ar)
-    ReaderT(client => client.fetchAs[AccessRequest](req))
+    ReaderT(client => client.fetchAs[AccessRequestStatus](req))
   }
 
   /** Posts a DbioReadRequest for a given user. */
-  def postReadRequest(ar: AccessRequest, client: Client[IO]): IO[AccessRequest] =
+  def postReadRequest(ar: AccessRequest, client: Client[IO]): IO[AccessRequestStatus] =
     doPost(ar, ReadRequests).run(client)
 
   /** Posts a DbioWriteRequest for a given user. */
-  def postWriteRequest(ar: AccessRequest, client: Client[IO]): IO[AccessRequest] =
+  def postWriteRequest(ar: AccessRequest, client: Client[IO]): IO[AccessRequestStatus] =
     doPost(ar, WriteRequests).run(client)
 
   private def doGetList(
@@ -88,15 +94,11 @@ object DbioAccessControl {
   ): ReaderT[IO, Client[IO], AccessRequestStatus] =
     ReaderT(client => client.expect[AccessRequestStatus](uri / "id" / id))
 
-  /** Gets list of DbioReadRequests for the given user. TODO: Should be queried by requestor not
-    * requestee.
-    */
+  /** Gets list of DbioReadRequests for the given user. */
   def getReadRequests(requestee: String, client: Client[IO]): IO[List[AccessRequestStatus]] =
     doGetList(requestee, ReadRequests).run(client)
 
-  /** Gets list of DbioWriteRequests for the given user. TODO: Should be queried by requestor not
-    * requestee.
-    */
+  /** Gets list of DbioWriteRequests for the given user. */
   def getWriteRequests(requestee: String, client: Client[IO]): IO[List[AccessRequestStatus]] =
     doGetList(requestee, WriteRequests).run(client)
 
@@ -121,4 +123,5 @@ object DbioAccessControl {
           IO.raiseError(
             new IllegalAccessError(
               s"[DbioAccessControl] AccessRequest not for requestor=$requestor")))
+
 }
