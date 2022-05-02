@@ -42,12 +42,15 @@ final case class AccessRequestStatus(
   requestApproved: Boolean,
   requestOpen: Boolean,
   createdTime: ZonedDateTime,
-  lastUpdatedTime: ZonedDateTime
-)
+  lastUpdatedTime: ZonedDateTime,
+  requestType: Option[String],
+) {
+  def withType(t: String) = copy(requestType = Some(t))
+}
 
 object AccessRequestStatus {
   implicit val decARS: Decoder[AccessRequestStatus] =
-    Decoder.forProduct8(
+    Decoder.forProduct9(
       "id",
       "requestor_eth_address",
       "requestor_details",
@@ -55,7 +58,7 @@ object AccessRequestStatus {
       "request_approved",
       "request_open",
       "created_time",
-      "last_updated_time")(AccessRequestStatus.apply)
+      "last_updated_time", "request_type")(AccessRequestStatus.apply)
 
   implicit val entDecARS: EntityDecoder[IO, AccessRequestStatus] =
     jsonOf[IO, AccessRequestStatus]
@@ -65,6 +68,8 @@ object AccessRequestStatus {
 }
 
 object DbioAccessControl {
+  val ReadType: String = "ReadRequest"
+  val WriteType: String = "WriteRequest"
   val Base: Uri = uri"http://dbio-protocol:8080/dbio"
   val ReadRequests = Base / "read_requests"
   val WriteRequests = Base / "write_requests"
@@ -76,11 +81,11 @@ object DbioAccessControl {
 
   /** Posts a DbioReadRequest for a given user. */
   def postReadRequest(ar: AccessRequest, client: Client[IO]): IO[AccessRequestStatus] =
-    doPost(ar, ReadRequests).run(client)
+    doPost(ar, ReadRequests).map(_.withType(ReadType)).run(client)
 
   /** Posts a DbioWriteRequest for a given user. */
   def postWriteRequest(ar: AccessRequest, client: Client[IO]): IO[AccessRequestStatus] =
-    doPost(ar, WriteRequests).run(client)
+    doPost(ar, WriteRequests).map(_.withType(WriteType)).run(client)
 
   private def doGetList(
     requesteeEth: String,
@@ -98,18 +103,18 @@ object DbioAccessControl {
 
   /** Gets list of DbioReadRequests for the given user. */
   def getReadRequests(requestee: String, client: Client[IO]): IO[List[AccessRequestStatus]] =
-    doGetList(requestee, ReadRequests).run(client)
+    doGetList(requestee, ReadRequests).map(_.map(_.withType(ReadType))).run(client)
 
   /** Gets list of DbioWriteRequests for the given user. */
   def getWriteRequests(requestee: String, client: Client[IO]): IO[List[AccessRequestStatus]] =
-    doGetList(requestee, WriteRequests).run(client)
+    doGetList(requestee, WriteRequests).map(_.map(_.withType(WriteType))).run(client)
 
   /** Gets single DbioReadRequest for the given user and requestor pair. */
   def getReadRequest(id: Int, requestor: String, client: Client[IO]): IO[AccessRequestStatus] =
     doGet(id, ReadRequests)
       .run(client)
       .flatMap(a =>
-        if (a.requestorEthAddress === requestor) IO.pure(a)
+        if (a.requestorEthAddress === requestor) IO.pure(a.withType(ReadType))
         else
           IO.raiseError(
             new IllegalAccessError(
@@ -120,7 +125,7 @@ object DbioAccessControl {
     doGet(id, WriteRequests)
       .run(client)
       .flatMap(a =>
-        if (a.requestorEthAddress === requestor) IO.pure(a)
+        if (a.requestorEthAddress === requestor) IO.pure(a.withType(WriteType))
         else
           IO.raiseError(
             new IllegalAccessError(

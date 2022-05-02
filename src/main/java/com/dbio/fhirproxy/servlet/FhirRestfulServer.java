@@ -21,6 +21,7 @@ public class FhirRestfulServer extends RestfulServer {
     @Override
     protected void initialize() throws ServletException {
         super.initialize();
+        System.loadLibrary("ironoxide_java"); // Set up IronCore binary
         setFhirContext(FhirContext.forR4());
         setResourceProviders(new PatientResourceProvider(), new DbioAccessRequestProvider());
     }
