@@ -174,9 +174,11 @@ object DbioResource {
     requestor: Requestor,
     req: DbioGetRequest,
     uri: Uri
-  ): Request[IO] =
-    Request[IO](method = GET, uri = uri / user.ethPublicAddress / req.resourceType / req.resourceId)
-      .withEntity(requestor)
+  ): Request[IO] = {
+    val route =
+      uri / user.ethPublicAddress / req.resourceType / req.resourceId / requestor.ethAddress
+    Request[IO](method = GET, uri = route)
+  }
 
   /** Reads a ciphertext resource from the backend and decrypts it. */
   def get(req: DbioGetRequest): ReaderT[IO, InjectClients, DbioGetResponse] =
