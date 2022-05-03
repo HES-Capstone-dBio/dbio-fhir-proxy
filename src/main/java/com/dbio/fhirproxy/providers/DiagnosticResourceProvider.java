@@ -51,12 +51,15 @@ public class DiagnosticResourceProvider implements IResourceProvider {
 
     @Create
     public MethodOutcome createDiagnostic(@ResourceParam DiagnosticReport diagnostic, @RequiredParam(name = "subjectEmail") String subjectEmail) {
+        if (subjectEmail == null){
+            throw new IllegalArgumentException("Request must contain query parameter `subjectEmail`");
+        }
         String id = ProviderUtils.generateUUID(diagnostic);
         DbioPostRequest request = new DbioPostRequest(subjectEmail, PROVIDER_EMAIL, PROVIDER_ETH_ADDRESS, TYPE_NAME, id, ProviderUtils.serialize(diagnostic));
         try {
             DbioPostResponse response = (DbioPostResponse) DbioResource.post(request).apply(injectClients).unsafeRunSync(IORuntime.global());
             log.info(String.format("[DbioResource] DiagnosticReport POST succeeded for id: %s", id));
-            return new MethodOutcome(new IdType(id), new OperationOutcome()).setId(new IdType(id)).setResource(diagnostic);
+            return new MethodOutcome(new IdType(id), new OperationOutcome()).setResource(diagnostic.setId(new IdType(id)));
         } catch (Throwable t) {
             String error = String.format("[DbioResource] DiagnosticReport POST failed with: %s", t);
             log.error(error);

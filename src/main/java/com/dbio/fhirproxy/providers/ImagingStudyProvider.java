@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import cats.effect.IO;
 import cats.effect.unsafe.IORuntime;
 import com.dbio.protocol.*;
@@ -21,7 +22,7 @@ import scala.runtime.BoxedUnit;
 
 import static com.dbio.fhirproxy.providers.ProviderUtils.*;
 
-public class ImagingStudyProvider {
+public class ImagingStudyProvider implements IResourceProvider {
     public static String TYPE_NAME = "ImagingStudy";
     private static final IronOxide<IO> ironCore = IronCore.forUser(PROVIDER_EMAIL, PASSWORD).unsafeRunSync(IORuntime.global());
     private static final Tuple2<Client<IO>, IO<BoxedUnit>> clientAllocate = DbioResource.allocateClient().unsafeRunSync(IORuntime.global());
@@ -48,12 +49,15 @@ public class ImagingStudyProvider {
 
     @Create
     public MethodOutcome createImagingStudy(@ResourceParam ImagingStudy study, @RequiredParam(name = "subjectEmail") String subjectEmail) {
+        if (subjectEmail == null){
+            throw new IllegalArgumentException("Request must contain query parameter `subjectEmail`");
+        }
         String id = ProviderUtils.generateUUID(study);
         DbioPostRequest request = new DbioPostRequest(subjectEmail, PROVIDER_EMAIL, PROVIDER_ETH_ADDRESS, TYPE_NAME, id, ProviderUtils.serialize(study));
         try {
             DbioPostResponse response = (DbioPostResponse) DbioResource.post(request).apply(injectClients).unsafeRunSync(IORuntime.global());
             log.info(String.format("[DbioResource] ImagingStudy POST succeeded for id: %s", id));
-            return new MethodOutcome(new IdType(id), new OperationOutcome()).setId(new IdType(id)).setResource(study);
+            return new MethodOutcome(new IdType(id), new OperationOutcome()).setResource(study.setId(new IdType(id)));
         } catch (Throwable t) {
             String error = String.format("[DbioResource] ImagingStudy POST failed with: %s", t);
             log.error(error);

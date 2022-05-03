@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import scala.Tuple2;
 import scala.runtime.BoxedUnit;
 
+import java.net.MalformedURLException;
+
 import static com.dbio.fhirproxy.providers.ProviderUtils.*;
 
 public class PatientResourceProvider implements IResourceProvider {
@@ -58,6 +60,9 @@ public class PatientResourceProvider implements IResourceProvider {
 
     @Create
     public MethodOutcome createPatient(@ResourceParam Patient patient, @RequiredParam(name = "subjectEmail") String subjectEmail) {
+        if (subjectEmail == null){
+            throw new IllegalArgumentException("Request must contain query parameter `subjectEmail`");
+        }
         String id = ProviderUtils.generateUUID(patient);
         DbioPostRequest request = new DbioPostRequest(
                 subjectEmail,
@@ -70,7 +75,7 @@ public class PatientResourceProvider implements IResourceProvider {
         try {
             DbioPostResponse response = (DbioPostResponse) DbioResource.post(request).apply(injectClients).unsafeRunSync(IORuntime.global());
             log.info(String.format("[DbioResource] Patient POST succeeded for id: %s", id));
-            return new MethodOutcome(new IdType(id), new OperationOutcome()).setId(new IdType(id)).setResource(patient);
+            return new MethodOutcome(new IdType(id), new OperationOutcome()).setResource(patient.setId(new IdType(id)));
         } catch (Throwable t) {
             String diagnostic = String.format("[DbioResource] Patient POST failed with: %s", t);
             log.error(diagnostic);

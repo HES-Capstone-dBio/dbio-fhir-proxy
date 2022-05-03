@@ -29,7 +29,6 @@ import static com.dbio.fhirproxy.providers.ProviderUtils.PROVIDER_DETAILS;
 import static com.dbio.fhirproxy.providers.ProviderUtils.PROVIDER_ETH_ADDRESS;
 
 public class DbioAccessRequestProvider implements IResourceProvider {
-
     private static final Tuple2<Client<IO>, IO<BoxedUnit>> clientAllocate = DbioResource.allocateClient().unsafeRunSync(IORuntime.global());
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -67,10 +66,12 @@ public class DbioAccessRequestProvider implements IResourceProvider {
             switch (dbioAccessRequest.accessRequestType.getValue()) {
                 case "ReadRequest":
                     log.info(String.format("POST ReadRequest for %s", req.requesteeEthAddress()));
-                    return new MethodOutcome().setResource(fromAccessRequestStatus(DbioAccessControl.postReadRequest(req, clientAllocate._1()).unsafeRunSync(IORuntime.global())));
+                    DbioAccessRequest readOut = fromAccessRequestStatus(DbioAccessControl.postReadRequest(req, clientAllocate._1()).unsafeRunSync(IORuntime.global()));
+                    return new MethodOutcome().setResource(readOut);
                 case "WriteRequest":
                     log.info(String.format("POST WriteRequest for %s", req.requesteeEthAddress()));
-                    return new MethodOutcome().setResource(fromAccessRequestStatus(DbioAccessControl.postWriteRequest(req, clientAllocate._1()).unsafeRunSync(IORuntime.global())));
+                    DbioAccessRequest writeOut = fromAccessRequestStatus(DbioAccessControl.postWriteRequest(req, clientAllocate._1()).unsafeRunSync(IORuntime.global()));
+                    return new MethodOutcome().setResource(writeOut);
                 default: throw new IllegalArgumentException(String.format("Incorrect type information in request: %s", dbioAccessRequest.accessRequestType));
             }
         } catch (Throwable e) {
