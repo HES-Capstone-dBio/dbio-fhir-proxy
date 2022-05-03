@@ -82,7 +82,7 @@ public class PatientResourceProvider implements IResourceProvider {
             OperationOutcome.OperationOutcomeIssueComponent issue =
                     new OperationOutcome.OperationOutcomeIssueComponent().setDiagnostics(diagnostic);
             OperationOutcome outcome = new OperationOutcome().addIssue(issue);
-            return new MethodOutcome(new IdType(id), outcome).setResource(patient);
+            return new MethodOutcome(new IdType(id), outcome);
         }
     }
 

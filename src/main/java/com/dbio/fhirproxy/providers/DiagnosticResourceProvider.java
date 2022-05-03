@@ -65,7 +65,7 @@ public class DiagnosticResourceProvider implements IResourceProvider {
             log.error(error);
             OperationOutcome.OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent().setDiagnostics(error);
             OperationOutcome outcome = new OperationOutcome().addIssue(issue);
-            return new MethodOutcome(new IdType(id), outcome).setResource(diagnostic);
+            return new MethodOutcome(new IdType(id), outcome);
         }
     }
 
