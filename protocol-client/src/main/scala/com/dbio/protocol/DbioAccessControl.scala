@@ -43,7 +43,7 @@ final case class AccessRequestStatus(
   requestOpen: Boolean,
   createdTime: ZonedDateTime,
   lastUpdatedTime: ZonedDateTime,
-  requestType: Option[String],
+  requestType: Option[String]
 ) {
   def withType(t: String) = copy(requestType = Some(t))
 }
@@ -58,7 +58,9 @@ object AccessRequestStatus {
       "request_approved",
       "request_open",
       "created_time",
-      "last_updated_time", "request_type")(AccessRequestStatus.apply)
+      "last_updated_time",
+      "request_type"
+    )(AccessRequestStatus.apply)
 
   implicit val entDecARS: EntityDecoder[IO, AccessRequestStatus] =
     jsonOf[IO, AccessRequestStatus]
