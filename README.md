@@ -1,6 +1,12 @@
-# FHIR proxy server for the dBio system.
+# FHIR Proxy Server
 
-This project is the FHIR Proxy Server service of the dBio system.
+## Purpose
+
+The project consists of a working example implementation of FHIR (Fast Healthcare Interoperability Standard) for use in healthcare provider infrastructure. dBio's proxy server builds on top of the [HAPI FHIR](https://hapifhir.io/) project and currently supports 3 Resource types from the FHIR standard (`Patient`, `DiagnosticReport`, `ImagingStudy`). Access controls are managed by the `DbioAccessRequest` Resource, which is a custom extension added to allow interoperability with the dBio protocol layer.
+
+The FHIR proxy's purpose in the dBio architecture is to serve as a gateway or conduit for interactions with the dBio protocol from the confines of third party infrastructure (e.g. hospitals, universities, clinical research labs). By leveraging the FHIR standard, dBio enables fully extensible and standards compliant interactions with patient data.
+
+![fhir-proxy-perspective](./readme-images/FHIR-Proxy-Perspective.png)
 
 ## Running Locally
 
@@ -20,20 +26,20 @@ mvn clean spring-boot:run -Pboot
 
 Open the project with the Intellij IDE. Go to File->Project Structure and set the both the SDK and Language level to 17 in the projects tab.
 
-![project-version](/readme-images/project-version.png)
+![project-version](./readme-images/project-version.png)
 
 
 In this same window click on the "modules" tab. Set the language level to 17. Click Apply and then Close.
 
-![module-version](/readme-images/module-version.png)
+![module-version](./readme-images/module-version.png)
 
 Next look for the "Add Configurations" button close to the top right of the IDE. Click it to bring up run configurations.
 
-![add-configurations](/readme-images/add-configurations.png)
+![add-configurations](./readme-images/add-configurations.png)
 
 Click the "+" symbol at the top left of this new screen and select "Spring Boot". Configure it as seen in the image below.
 
-![run-debug-menu](/readme-images/run-debug-menu.png)
+![run-debug-menu](./readme-images/run-debug-menu.png)
 
 Then click "Apply" and "Ok". Your new configuration is now done and you can run it by clicking the run button in the IDE.
 
