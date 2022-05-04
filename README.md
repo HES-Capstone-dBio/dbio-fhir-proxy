@@ -57,10 +57,178 @@ A MacOS or Linux computer with the [x86-64](https://en.wikipedia.org/wiki/X86-64
 ## Contributing to the Project
 New `IResourceProvider` implementations (interfaces for serving Resources) are always welcome, and for the most part they can be cribbed from existing examples in `src/com/dbio/fhirproxy/providers`. Fork this repository, develop a Provider, run the server locally as shown below, and submit a pull request for review by maintaienrs!
 
+## API Documentation
+
+All API documentation assumes this server is running as a Docker container on a
+local network with the [dbio-demo](https://github.com/HES-Capstone-dBio/dbio-demo) `docker-compose` file. However if deployed elsewhere, the URL for `localhost` can simply be substituted.
+
+### Access Control
+
+#### `POST /fhir/DbioAccessRequest`
+**Creates a read or write request for a given patient.**
+```
+# message body for write requests
+{
+  "resourceType":"DbioAccessRequest",
+  "requestee_eth_address":"<patient's ETH address>",
+  "access_request_type": "WriteRequest"
+}
+# message body for read requests
+{
+  "resourceType":"DbioAccessRequest",
+  "requestee_eth_address":"<patient's ETH address>",
+  "access_request_type": "ReadRequest"
+}
+```
+
+#### `GET /fhir/DbioAccessRequest`
+**Searches all (open or closed) requests for the given patient's ETH address and request type.**
+**Required parameters:**
+* `requestee_eth_address=<patient's ETH>`
+* `access_request_type=(ReadRequest|WriteRequest)`
+
+#### `GET /fhir/DbioAccessRequest/{id}`
+**Gets the status of a specific access request by its identifier.**
+**ID format:** `WriteRequest-{number}` or `ReadRequest-{number}`. The
+identifier for requests is always returned as part of the POST and other GET routes.
+
+### Resources
+
+*Note:* The documentation for each implemented ResourceProvider is the same, but here
+we use `Patient` as the example. Any occurence of `Patient` in the below
+examples can be replaced with `ImagingStudy` or `DiagnosticReport` to access
+those resources.
+
+#### `POST /fhir/Patient`
+**Required parameters:**
+* `subjectEmail=<patient's email address>`
+
+```
+# example message body containing valid FHIR JSON
+{
+  "resourceType": "Patient",
+  "identifier": [
+    {
+      "use": "usual",
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MR"
+          }
+        ]
+      },
+      "system": "urn:oid:1.2.36.146.595.217.0.1",
+      "value": "12345",
+      "period": {
+        "start": "2001-05-06"
+      },
+      "assigner": {
+        "display": "Acme Healthcare"
+      }
+    }
+  ],
+  "active": true,
+  "name": [
+    {
+      "use": "official",
+      "family": "Chalmers",
+      "given": [
+        "Peter",
+        "James"
+      ]
+    },
+    {
+      "use": "usual",
+      "given": [
+        "Jim"
+      ]
+    },
+    {
+      "use": "maiden",
+      "family": "Windsor",
+      "given": [
+        "Peter",
+        "James"
+      ],
+      "period": {
+        "end": "2002"
+      }
+    }
+  ],
+  "telecom": [
+    {
+      "use": "home"
+    },
+    {
+      "system": "phone",
+      "value": "(03) 5555 6473",
+      "use": "work",
+      "rank": 1
+    },
+    {
+      "system": "phone",
+      "value": "(03) 3410 5613",
+      "use": "mobile",
+      "rank": 2
+    },
+    {
+      "system": "phone",
+      "value": "(03) 5555 8834",
+      "use": "old",
+      "period": {
+        "end": "2014"
+      }
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1974-12-25",
+  "_birthDate": {
+    "extension": [
+      {
+        "url": "http://hl7.org/fhir/StructureDefinition/patient-birthTime",
+        "valueDateTime": "1974-12-25T14:35:45-05:00"
+      }
+    ]
+  },
+  "deceasedBoolean": false,
+  "address": [
+    {
+      "use": "home",
+      "type": "both",
+      "text": "534 Erewhon St PeasantVille, Rainbow, Vic  3999",
+      "line": [
+        "534 Erewhon St"
+      ],
+      "city": "PleasantVille",
+      "district": "Rainbow",
+      "state": "Vic",
+      "postalCode": "3999",
+      "period": {
+        "start": "1974-12-25"
+      }
+    }
+  ],
+  "managingOrganization": {
+    "reference": "Organization/1"
+  }
+}
+```
+
+#### `GET /fhir/Patient`
+**Required parameters:**
+* `id=<resource identifier as returned by POST>`
+* `subjectEmail=<patient's email address>`
+
+*Note:* Returns a search bundle of `Patient` resources for the given patient. Direct
+`GET` access for resources is not currently available due to limitations in
+HAPI FHIR's API, but the search results contain full records which can be
+parsed out.
+
 ## Running the Server Locally
 
 ### Using Docker
-To use the most recently published image for this server, execute the command `docker run -p 8081:8080 ssheldharv/dbio-fhir-proxy:latest`. To run a locallly built image, use the tag specified in `docker build` for your image. This will launch the FHIR proxy locally accessible at `localhost:8081`. To run this server in the larger context of the dBio application, see [dbio-demo](https://github.com/HES-Capstone-dBio).
+To use the most recently published image for this server, execute the command `docker run -p 8081:8080 ssheldharv/dbio-fhir-proxy:latest`. To run a locallly built image, use the tag specified in `docker build` for your image. This will launch the FHIR proxy locally accessible at `localhost:8081`. To run this server in the larger context of the dBio application, see [dbio-demo](https://github.com/HES-Capstone-dBio/dbio-demo).
 *Note:* Commit specific image tags are also available on [Dockerhub](https://hub.docker.com/r/ssheldharv/dbio-fhir-proxy).
 
 ### Using Maven
