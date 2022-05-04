@@ -59,9 +59,6 @@ New `IResourceProvider` implementations (interfaces for serving Resources) are a
 
 ## API Documentation
 
-All API documentation assumes this server is running as a Docker container on a
-local network with the [dbio-demo](https://github.com/HES-Capstone-dBio/dbio-demo) `docker-compose` file. However if deployed elsewhere, the URL for `localhost` can simply be substituted.
-
 ### Access Control
 
 #### `POST /fhir/DbioAccessRequest`
