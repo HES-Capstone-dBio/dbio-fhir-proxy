@@ -93,8 +93,9 @@ identifier for requests is always returned as part of the POST and other GET rou
 
 *Note:* The documentation for each implemented ResourceProvider is the same, but here
 we use `Patient` as the example. Any occurence of `Patient` in the below
-examples can be replaced with `ImagingStudy` or `DiagnosticReport` to access
-those resources.
+routes can be replaced with `ImagingStudy` or `DiagnosticReport` to access
+those resources. Note that the body payload however must be modified to be
+valid for the resource of interest.
 
 #### `POST /fhir/Patient`
 **Required parameters:**
