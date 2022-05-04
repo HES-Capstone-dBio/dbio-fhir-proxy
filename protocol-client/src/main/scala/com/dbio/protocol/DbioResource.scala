@@ -40,6 +40,15 @@ object User {
 
 }
 
+/** Simple type required in body of GET requests for FHIR Resources. */
+final case class Requestor(ethAddress: String)
+
+object Requestor {
+  implicit val reqEnc: Encoder[Requestor] =
+    Encoder.forProduct1("requestor_eth_address")(a => (a.ethAddress))
+  implicit val reqEntEnc: EntityEncoder[IO, Requestor] = jsonEncoderOf[IO, Requestor]
+}
+
 /** Request constructed by caller to POST a Resource to the dBio protocol.
   */
 final case class DbioPostRequest(
@@ -160,14 +169,27 @@ object DbioResource {
       client.expect[User](UserByEmail / email)
     }
 
+  private def resourceRequest(
+    user: User,
+    requestor: Requestor,
+    req: DbioGetRequest,
+    uri: Uri
+  ): Request[IO] = {
+    val route =
+      uri / user.ethPublicAddress / req.resourceType / req.resourceId / requestor.ethAddress
+    Request[IO](method = GET, uri = route)
+  }
+
   /** Reads a ciphertext resource from the backend and decrypts it. */
   def get(req: DbioGetRequest): ReaderT[IO, InjectClients, DbioGetResponse] =
     ReaderT { case InjectClients(iron, client) =>
       for {
-        user <- getUser(req.requesteeEmail).run(client)
-        claimed = ResourcesClaimed / user.ethPublicAddress / req.resourceType / req.resourceId
-        unclaimed = ResourcesUnclaimed / user.ethPublicAddress / req.resourceType / req.resourceId
-        resource <- client.get[DbioResource](claimed) { response =>
+        subject <- getUser(req.requesteeEmail).run(client)
+        _requestor <- getUser(req.requestorEmail).run(client)
+        requestor = Requestor(_requestor.ethPublicAddress)
+        claimed = resourceRequest(subject, requestor, req, ResourcesClaimed)
+        unclaimed = resourceRequest(subject, requestor, req, ResourcesUnclaimed)
+        resource <- client.fetch[DbioResource](claimed) { response =>
           if (response.status.isSuccess) response.as[DbioResource]
           else client.expect[DbioResource](unclaimed)
         }
