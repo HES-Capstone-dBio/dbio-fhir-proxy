@@ -18,6 +18,11 @@ public class FhirRestfulServer extends RestfulServer {
 
     public FhirRestfulServer(ApplicationContext context) {
         this.applicationContext = context;
+         try {
+             initialize();
+         } catch (Exception e) {
+             System.out.println("Unable to initialize FHIR Proxy");
+         };
     }
 
     @Override
