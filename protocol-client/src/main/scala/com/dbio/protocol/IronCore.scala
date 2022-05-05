@@ -13,6 +13,7 @@ import ironoxide.v1.user.UserCreateOpts
 import scodec.bits.ByteVector
 
 import scala.concurrent.duration._
+import java.util.UUID
 
 object IronCore {
   private val _ = System.loadLibrary("ironoxide_java")
@@ -46,9 +47,11 @@ object IronCore {
     * @param to
     *   patient
     */
-  private def transferGroupOpts(from: UserId, to: UserId): GroupCreateOpts =
+  private def transferGroupOpts(from: UserId, to: UserId): GroupCreateOpts = {
+    val _id = s"${from.id}->${to.id}"
+    val id = UUID.nameUUIDFromBytes(_id.getBytes()).toString().replaceAll("-", "")
     GroupCreateOpts(
-      id = None,
+      id = Some(GroupId(id)),
       name = None,
       addAsAdmin = false,
       addAsMember = true,
@@ -57,6 +60,7 @@ object IronCore {
       members = List(from, to),
       needsRotation = false
     )
+  }
 
   /** Transfer options for the incoming resource/document.
     *
