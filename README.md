@@ -2,12 +2,6 @@
 
 # dBio FHIR Proxy Server
 
-<br>
-
----
-
-<br>
-
 ## Purpose
 
 The project consists of a working example implementation of FHIR (Fast Healthcare Interoperability Standard) for the dBio decentralized application. dBio's proxy server builds on top of the [HAPI FHIR](https://hapifhir.io/) project and allows read and write to patients' healthcare data wallets on [web3](https://www.nytimes.com/interactive/2022/03/18/technology/web3-definition-internet.html). This project currently supports 3 FHIR Resource types from the R4 standard (`Patient`, `DiagnosticReport`, `ImagingStudy`) but can be easily extended to more types. Access controls are managed by the `DbioAccessRequest` Resource, which is a custom extension added to facilitate interoperability with the dBio protocol layer.
