@@ -54,16 +54,8 @@ public class ImagingStudyProvider implements IResourceProvider {
         }
         String id = ProviderUtils.generateUUID(study);
         DbioPostRequest request = new DbioPostRequest(subjectEmail, PROVIDER_EMAIL, PROVIDER_ETH_ADDRESS, TYPE_NAME, id, ProviderUtils.serialize(study));
-        try {
-            DbioPostResponse response = (DbioPostResponse) DbioResource.post(request).apply(injectClients).unsafeRunSync(IORuntime.global());
-            log.info(String.format("[DbioResource] ImagingStudy POST succeeded for id: %s", id));
-            return new MethodOutcome(new IdType(id), new OperationOutcome()).setResource(study.setId(new IdType(id)));
-        } catch (Throwable t) {
-            String error = String.format("[DbioResource] ImagingStudy POST failed with: %s", t);
-            log.error(error);
-            OperationOutcome.OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent().setDiagnostics(error);
-            OperationOutcome outcome = new OperationOutcome().addIssue(issue);
-            return new MethodOutcome(new IdType(id), outcome);
-        }
+        DbioPostResponse response = (DbioPostResponse) DbioResource.post(request).apply(injectClients).unsafeRunSync(IORuntime.global());
+        log.info(String.format("[DbioResource] ImagingStudy POST succeeded for id: %s", id));
+        return new MethodOutcome(new IdType(id), new OperationOutcome()).setResource(study.setId(new IdType(id)));
     }
 }

@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import scala.Tuple2;
 import scala.runtime.BoxedUnit;
 
+import java.util.Collections;
+
 import static com.dbio.fhirproxy.providers.ProviderUtils.*;
 
 public class DiagnosticResourceProvider implements IResourceProvider {
@@ -56,17 +58,9 @@ public class DiagnosticResourceProvider implements IResourceProvider {
         }
         String id = ProviderUtils.generateUUID(diagnostic);
         DbioPostRequest request = new DbioPostRequest(subjectEmail, PROVIDER_EMAIL, PROVIDER_ETH_ADDRESS, TYPE_NAME, id, ProviderUtils.serialize(diagnostic));
-        try {
-            DbioPostResponse response = (DbioPostResponse) DbioResource.post(request).apply(injectClients).unsafeRunSync(IORuntime.global());
-            log.info(String.format("[DbioResource] DiagnosticReport POST succeeded for id: %s", id));
-            return new MethodOutcome(new IdType(id), new OperationOutcome()).setResource(diagnostic.setId(new IdType(id)));
-        } catch (Throwable t) {
-            String error = String.format("[DbioResource] DiagnosticReport POST failed with: %s", t);
-            log.error(error);
-            OperationOutcome.OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent().setDiagnostics(error);
-            OperationOutcome outcome = new OperationOutcome().addIssue(issue);
-            return new MethodOutcome(new IdType(id), outcome);
-        }
+        DbioPostResponse response = (DbioPostResponse) DbioResource.post(request).apply(injectClients).unsafeRunSync(IORuntime.global());
+        log.info(String.format("[DbioResource] DiagnosticReport POST succeeded for id: %s", id));
+        return new MethodOutcome(new IdType(id), new OperationOutcome()).setResource(diagnostic.setId(new IdType(id)));
     }
 
 }

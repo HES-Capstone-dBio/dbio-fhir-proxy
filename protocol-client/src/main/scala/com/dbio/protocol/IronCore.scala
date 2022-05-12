@@ -97,8 +97,10 @@ object IronCore {
         _ <- IO.raiseWhen(toVerify.isEmpty)(
           new IllegalStateException(s"User $to does not exist in IronCore"))
         opts = transferGroupOpts(from, to)
-        group <- iron.groupCreate(opts)
-      } yield group.id
+        id <- IO.fromOption(opts.id)(new IllegalArgumentException("No GroupId"))
+        meta <- iron.groupGetMetadata(id).attempt
+        out <- meta.fold(_ => iron.groupCreate(opts).map(_.id), _.id.pure[IO])
+      } yield out
     }
 
   /** Encrypts the given resource to a temporary "transfer group" including the target user.
