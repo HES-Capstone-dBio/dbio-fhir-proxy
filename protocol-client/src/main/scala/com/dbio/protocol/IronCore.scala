@@ -13,6 +13,7 @@ import ironoxide.v1.user.UserCreateOpts
 import scodec.bits.ByteVector
 
 import scala.concurrent.duration._
+
 import java.util.UUID
 
 object IronCore {
