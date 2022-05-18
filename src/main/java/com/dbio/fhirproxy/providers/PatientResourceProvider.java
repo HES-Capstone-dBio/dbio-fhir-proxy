@@ -72,18 +72,9 @@ public class PatientResourceProvider implements IResourceProvider {
                 id,
                 ProviderUtils.serialize(patient)
         );
-        try {
-            DbioPostResponse response = (DbioPostResponse) DbioResource.post(request).apply(injectClients).unsafeRunSync(IORuntime.global());
-            log.info(String.format("[DbioResource] Patient POST succeeded for id: %s", id));
-            return new MethodOutcome(new IdType(id), new OperationOutcome()).setResource(patient.setId(new IdType(id)));
-        } catch (Throwable t) {
-            String diagnostic = String.format("[DbioResource] Patient POST failed with: %s", t);
-            log.error(diagnostic);
-            OperationOutcome.OperationOutcomeIssueComponent issue =
-                    new OperationOutcome.OperationOutcomeIssueComponent().setDiagnostics(diagnostic);
-            OperationOutcome outcome = new OperationOutcome().addIssue(issue);
-            return new MethodOutcome(new IdType(id), outcome);
-        }
+        DbioPostResponse response = (DbioPostResponse) DbioResource.post(request).apply(injectClients).unsafeRunSync(IORuntime.global());
+        log.info(String.format("[DbioResource] Patient POST succeeded for id: %s", id));
+        return new MethodOutcome(new IdType(id), new OperationOutcome()).setResource(patient.setId(new IdType(id)));
     }
 
 }

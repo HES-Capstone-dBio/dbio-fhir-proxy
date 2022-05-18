@@ -62,20 +62,16 @@ public class DbioAccessRequestProvider implements IResourceProvider {
     @Create
     public MethodOutcome createAccessRequest(@ResourceParam DbioAccessRequest dbioAccessRequest) {
         AccessRequest req = new AccessRequest(PROVIDER_ETH_ADDRESS, dbioAccessRequest.requesteeEthAddress.getValue(), PROVIDER_DETAILS);
-        try {
-            switch (dbioAccessRequest.accessRequestType.getValue()) {
-                case "ReadRequest":
-                    log.info(String.format("POST ReadRequest for %s", req.requesteeEthAddress()));
-                    DbioAccessRequest readOut = fromAccessRequestStatus(DbioAccessControl.postReadRequest(req, clientAllocate._1()).unsafeRunSync(IORuntime.global()));
-                    return new MethodOutcome().setResource(readOut);
-                case "WriteRequest":
-                    log.info(String.format("POST WriteRequest for %s", req.requesteeEthAddress()));
-                    DbioAccessRequest writeOut = fromAccessRequestStatus(DbioAccessControl.postWriteRequest(req, clientAllocate._1()).unsafeRunSync(IORuntime.global()));
-                    return new MethodOutcome().setResource(writeOut);
-                default: throw new IllegalArgumentException(String.format("Incorrect type information in request: %s", dbioAccessRequest.accessRequestType));
-            }
-        } catch (Throwable e) {
-            return new MethodOutcome().setOperationOutcome(ProviderUtils.fhirException(String.format("Create AccessRequest failed with %s", e)));
+        switch (dbioAccessRequest.accessRequestType.getValue()) {
+            case "ReadRequest":
+                log.info(String.format("POST ReadRequest for %s", req.requesteeEthAddress()));
+                DbioAccessRequest readOut = fromAccessRequestStatus(DbioAccessControl.postReadRequest(req, clientAllocate._1()).unsafeRunSync(IORuntime.global()));
+                return new MethodOutcome().setResource(readOut);
+            case "WriteRequest":
+                log.info(String.format("POST WriteRequest for %s", req.requesteeEthAddress()));
+                DbioAccessRequest writeOut = fromAccessRequestStatus(DbioAccessControl.postWriteRequest(req, clientAllocate._1()).unsafeRunSync(IORuntime.global()));
+                return new MethodOutcome().setResource(writeOut);
+            default: throw new IllegalArgumentException(String.format("Incorrect type information in request: %s", dbioAccessRequest.accessRequestType));
         }
     }
 

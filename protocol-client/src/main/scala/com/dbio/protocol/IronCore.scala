@@ -14,6 +14,8 @@ import scodec.bits.ByteVector
 
 import scala.concurrent.duration._
 
+import java.util.UUID
+
 object IronCore {
   private val _ = System.loadLibrary("ironoxide_java")
   private val config = IronOxideConfig(PolicyCachingConfig(666), None)
@@ -46,9 +48,11 @@ object IronCore {
     * @param to
     *   patient
     */
-  private def transferGroupOpts(from: UserId, to: UserId): GroupCreateOpts =
+  private def transferGroupOpts(from: UserId, to: UserId): GroupCreateOpts = {
+    val _id = s"${from.id}->${to.id}"
+    val id = UUID.nameUUIDFromBytes(_id.getBytes()).toString().replaceAll("-", "")
     GroupCreateOpts(
-      id = None,
+      id = Some(GroupId(id)),
       name = None,
       addAsAdmin = false,
       addAsMember = true,
@@ -57,6 +61,7 @@ object IronCore {
       members = List(from, to),
       needsRotation = false
     )
+  }
 
   /** Transfer options for the incoming resource/document.
     *
@@ -93,8 +98,10 @@ object IronCore {
         _ <- IO.raiseWhen(toVerify.isEmpty)(
           new IllegalStateException(s"User $to does not exist in IronCore"))
         opts = transferGroupOpts(from, to)
-        group <- iron.groupCreate(opts)
-      } yield group.id
+        id <- IO.fromOption(opts.id)(new IllegalArgumentException("No GroupId"))
+        meta <- iron.groupGetMetadata(id).attempt
+        out <- meta.fold(_ => iron.groupCreate(opts).map(_.id), _.id.pure[IO])
+      } yield out
     }
 
   /** Encrypts the given resource to a temporary "transfer group" including the target user.
